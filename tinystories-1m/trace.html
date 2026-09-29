@@ -446,7 +446,7 @@ const NODE_RULES = [
   [/^Text → tokens|^Context so far|^Inputs and targets/, "n-tokenizer"],
   [/^Token embedding lookup|^Gradient through: Embeddings/, "n-tok-emb"],
   [/^Positional encoding/, "n-pos-emb"], [/^Input to the first block/, "n-add0"],
-  [/^LayerNorm 1/, "n-ln1"], [/^Projection weights|^Queries, keys, values/, "n-qkv"], [/^KV-cache/, "n-kv"],
+  [/^LayerNorm 1/, "n-ln1"], [/^Projection weights|^Queries, keys, values|^RoPE/, "n-qkv"], [/^KV-cache/, "n-kv"],
   [/^Concatenate heads/, "n-concat"], [/^Residual connection 1/, "n-add1"], [/^LayerNorm 2/, "n-ln2"],
   [/^Feed-forward/, "n-ffn"], [/^Residual connection 2/, "n-add2"],
   [/^Final LayerNorm|^Gradient through: Final LayerNorm/, "n-lnf"],
@@ -493,7 +493,15 @@ function fillDiagramLabels() {
   });
   const dots = diagram.querySelector("#llmsim-head-dots");
   if (dots) dots.style.display = c.n_heads > 2 ? "" : "none";
+  ropeLabels(diagram, c);
   if (c.n_heads < 2) diagram.querySelectorAll("#n-head2, #llmsim-head-dots").forEach(e => e.style.display = "none");
+}
+// with RoPE nothing is added to the token embeddings: the positions rotate Q and K
+function ropeLabels(svg, c) {
+  if (c.pos_encoding !== "rope") return;
+  const pos = svg.querySelector("#n-pos-emb .sub"), qkv = svg.querySelector("#n-qkv .sub");
+  if (pos) pos.textContent = "none (RoPE)";
+  if (qkv) qkv.textContent = "x·W_Q, x·W_K, x·W_V + RoPE";
 }
 function renderDiagram() {
   if (!diagram) return;
@@ -547,5 +555,6 @@ document.getElementById("title").textContent = DATA.title;
 if (DATA.home) { const a = document.getElementById("home"); a.href = DATA.home; a.hidden = false; }
 render();
 </script>
+<script data-goatcounter="https://makksi.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -219,7 +219,7 @@ ul.howto { padding-left: 18px; margin: 6px 0; font-size: 14px; }
 </svg>
 </aside>
 </main>
-<script type="application/json" id="data">{"generated": "2026-09-29", "models": [{"slug": "tiny", "name": "tiny", "file": "weights/tiny.npz", "config": {"vocab_size": 65, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "char", "params": 9184, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare, one token per character: every number fits on screen."}, {"slug": "tiny-bpe", "name": "tiny-bpe", "file": "weights/tiny-bpe.npz", "config": {"vocab_size": 256, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "bpe", "params": 15296, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare with a small BPE tokenizer (256 tokens)."}, {"slug": "tinystories-1m", "name": "TinyStories-1M", "file": "weights/tinystories-1m.npz", "config": {"vocab_size": 50257, "d_model": 64, "n_heads": 16, "n_layers": 8, "d_ff": 256, "block_size": 256, "pos_encoding": "learned"}, "tokenizer": "byte-bpe", "params": 6849280, "prompt": "Once upon a time there was a little girl named Lily. She", "description": "A real pretrained model converted exactly from Hugging Face, with GPT-2's tokenizer."}]}</script>
+<script type="application/json" id="data">{"generated": "2026-09-29", "models": [{"slug": "tiny-rope", "name": "tiny-rope", "file": "weights/tiny-rope.npz", "config": {"vocab_size": 65, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "rope"}, "tokenizer": "char", "params": 8672, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare, one token per character: every number fits on screen. Positions with RoPE: no position matrix, queries and keys are rotated in every layer."}, {"slug": "tiny", "name": "tiny", "file": "weights/tiny.npz", "config": {"vocab_size": 65, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "char", "params": 9184, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare, one token per character: every number fits on screen."}, {"slug": "tiny-bpe", "name": "tiny-bpe", "file": "weights/tiny-bpe.npz", "config": {"vocab_size": 256, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "bpe", "params": 15296, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare with a small BPE tokenizer (256 tokens)."}, {"slug": "tinystories-1m", "name": "TinyStories-1M", "file": "weights/tinystories-1m.npz", "config": {"vocab_size": 50257, "d_model": 64, "n_heads": 16, "n_layers": 8, "d_ff": 256, "block_size": 256, "pos_encoding": "learned"}, "tokenizer": "byte-bpe", "params": 6849280, "prompt": "Once upon a time there was a little girl named Lily. She", "description": "A real pretrained model converted exactly from Hugging Face, with GPT-2's tokenizer."}]}</script>
 <script>
 const DATA = JSON.parse(document.getElementById("data").textContent);
 function h(tag, cls, text) {
@@ -258,6 +258,10 @@ if (svg && c0) {
   svg.querySelectorAll("[data-fmt]").forEach(t => { t.textContent = t.dataset.fmt.replace(/\{(\w)\}/g, (_, k) => v[k] ?? k); });
   const dots = svg.querySelector("#llmsim-head-dots");
   if (dots) dots.style.display = c0.n_heads > 2 ? "" : "none";
+  if (c0.pos_encoding === "rope") {
+    svg.querySelector("#n-pos-emb .sub").textContent = "none (RoPE)";
+    svg.querySelector("#n-qkv .sub").textContent = "x·W_Q, x·W_K, x·W_V + RoPE";
+  }
 }
 document.getElementById("theme").onclick = () => {
   const r = document.documentElement;
@@ -265,5 +269,6 @@ document.getElementById("theme").onclick = () => {
   r.dataset.theme = dark ? "light" : "dark";
 };
 </script>
+<script data-goatcounter="https://makksi.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
