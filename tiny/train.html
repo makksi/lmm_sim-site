@@ -439,7 +439,6 @@ const NODE_RULES = [
   [/^Token embedding lookup|^Gradient through: Embeddings/, "n-tok-emb"],
   [/^Positional encoding/, "n-pos-emb"], [/^Input to the first block/, "n-add0"],
   [/^LayerNorm 1/, "n-ln1"], [/^Projection weights|^Queries, keys, values/, "n-qkv"], [/^KV-cache/, "n-kv"],
-  [/^Attention scores|^Causal mask|^Weighted sum|^All \d+ heads/, "n-attn"],
   [/^Concatenate heads/, "n-concat"], [/^Residual connection 1/, "n-add1"], [/^LayerNorm 2/, "n-ln2"],
   [/^Feed-forward/, "n-ffn"], [/^Residual connection 2/, "n-add2"],
   [/^Final LayerNorm|^Gradient through: Final LayerNorm/, "n-lnf"],
@@ -463,6 +462,10 @@ function nodesFor(s) {
     for (const [re, ids] of TRAIN_RULES) if (re.test(s.title)) return ids;
     return [];
   }
+  // the steps of one head light up its lane: head 1 on the left, any other head on the right
+  const head = s.section.match(/Head (\d+)\//);
+  if (head) return [+head[1] === 1 ? "n-head1" : "n-head2"];
+  if (/^All \d+ heads/.test(s.title)) return ["n-attn", "n-head1", "n-head2"];
   for (const [re, id] of NODE_RULES) if (re.test(s.title)) return [id];
   return [];
 }
@@ -480,6 +483,9 @@ function fillDiagramLabels() {
   diagram.querySelectorAll("[data-fmt]").forEach(t => {
     t.textContent = t.dataset.fmt.replace(/\{(\w)\}/g, (_, k) => v[k] ?? k);
   });
+  const dots = diagram.querySelector("#llmsim-head-dots");
+  if (dots) dots.style.display = c.n_heads > 2 ? "" : "none";
+  if (c.n_heads < 2) diagram.querySelectorAll("#n-head2, #llmsim-head-dots").forEach(e => e.style.display = "none");
 }
 function renderDiagram() {
   if (!diagram) return;
@@ -492,6 +498,8 @@ function renderDiagram() {
   const lb = diagram.querySelector("#llmsim-layer-badge"), hb = diagram.querySelector("#llmsim-head-badge");
   if (lb) lb.textContent = L ? `layer ${L.i}${L.n ? " / " + L.n : ""}` : "";
   if (hb) hb.textContent = head ? `head ${head[1]} / ${head[2]}` : all ? `all ${all[1]} heads` : "";
+  const lane2 = diagram.querySelector("#llmsim-lane2");     // shows the head being traced
+  if (lane2 && DATA.model) lane2.textContent = `head ${head && +head[1] > 1 ? head[1] : DATA.model.n_heads}`;
 }
 if (diagram) {
   diagram.querySelectorAll(".node").forEach(n => n.addEventListener("click", () => {
