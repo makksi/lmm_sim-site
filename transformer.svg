@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="llmsim-diagram standalone" viewBox="0 0 480 1010" width="480" height="1010" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Block diagram of the transformer simulated by LLM-Sim">
+  <style>
+    .llmsim-diagram.standalone { --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --border: #c9c9c6; --accent: #6a3fd1; --accent-soft: #efe9fb; --bg: #f7f7f5; }
+    @media (prefers-color-scheme: dark) {
+      .llmsim-diagram.standalone { --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #4a4a52; --accent: #b49bff; --accent-soft: #2c2640; --bg: #151517; }
+    }
+    .llmsim-diagram .bgfill { fill: var(--bg); }
+    .llmsim-diagram .node rect, .llmsim-diagram .node circle { fill: var(--panel); stroke: var(--border); stroke-width: 1.3; }
+    .llmsim-diagram .node text { fill: var(--text); font-size: 13px; text-anchor: middle; }
+    .llmsim-diagram .node .sub { fill: var(--muted); font-size: 11px; }
+    .llmsim-diagram .node.on rect, .llmsim-diagram .node.on circle { stroke: var(--accent); stroke-width: 2.6; fill: var(--accent-soft); }
+    .llmsim-diagram .node.on text { font-weight: 600; }
+    .llmsim-diagram .node.clickable { cursor: pointer; }
+    .llmsim-diagram .node.clickable:hover rect, .llmsim-diagram .node.clickable:hover circle { stroke: var(--accent); }
+    .llmsim-diagram .flow { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+    .llmsim-diagram .residual { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 5 3; }
+    .llmsim-diagram .loop { stroke: var(--accent); stroke-width: 1.4; fill: none; stroke-dasharray: 2 3; }
+    .llmsim-diagram .node rect.container { fill: none; stroke: var(--border); stroke-width: 1.3; stroke-dasharray: 6 4; }
+    .llmsim-diagram .node.on rect.container { fill: none; stroke: var(--accent); stroke-width: 2.6; }
+    .llmsim-diagram .label { fill: var(--muted); font-size: 11.5px; }
+    .llmsim-diagram .title { fill: var(--text); font-size: 12.5px; font-weight: 600; }
+    .llmsim-diagram .badge { fill: var(--accent); font-size: 12px; font-weight: 600; }
+    .llmsim-diagram .arrowhead { fill: var(--muted); }
+    .llmsim-diagram .arrowhead-accent { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="llmsim-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+    <marker id="llmsim-arr-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="arrowhead-accent" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+  <rect class="bgfill" x="0" y="0" width="480" height="1010"/>
+
+  <!-- input side -->
+  <g class="node" id="n-tokenizer"><rect x="110" y="16" width="220" height="44" rx="8"/>
+    <text x="220" y="35">Tokenizer</text><text class="sub" x="220" y="51">text → token ids</text></g>
+  <path class="flow" d="M220,60 V78 H160 V92" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M220,78 H300 V92" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-tok-emb"><rect x="95" y="94" width="130" height="48" rx="8"/>
+    <text x="160" y="114">Token embedding</text><text class="sub" x="160" y="131" data-fmt="W_E ({V}×{C})">W_E (V×d)</text></g>
+  <g class="node" id="n-pos-emb"><rect x="235" y="94" width="130" height="48" rx="8"/>
+    <text x="300" y="114">Position</text><text class="sub" x="300" y="131" data-fmt="P ({T}×{C})">P (T×d)</text></g>
+  <path class="flow" d="M160,142 V160 H209" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M300,142 V160 H231" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add0"><circle cx="220" cy="160" r="11"/><text x="220" y="165">+</text></g>
+  <path class="flow" d="M220,171 V214" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="232" y="192">x₀: the residual stream</text>
+
+  <!-- transformer block -->
+  <g class="node" id="n-block"><rect class="container" x="30" y="200" width="420" height="500" rx="12"/></g>
+  <text class="title" x="44" y="220" data-fmt="Transformer block × {L}">Transformer block × N</text>
+  <text class="badge" id="llmsim-layer-badge" x="436" y="220" text-anchor="end"></text>
+
+  <!-- attention half -->
+  <path class="residual" d="M220,228 H60 V488 H209" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="50" y="360" transform="rotate(-90 50 360)" text-anchor="middle">residual</text>
+  <text class="label" x="50" y="590" transform="rotate(-90 50 590)" text-anchor="middle">residual</text>
+  <g class="node" id="n-ln1"><rect x="110" y="232" width="220" height="34" rx="8"/>
+    <text x="220" y="254">LayerNorm 1</text></g>
+  <path class="flow" d="M220,266 V280" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-qkv"><rect x="110" y="282" width="220" height="44" rx="8"/>
+    <text x="220" y="301">Q, K, V projections</text><text class="sub" x="220" y="317" data-fmt="x·W_Q, x·W_K, x·W_V  ({C}×{C})">x·W_Q, x·W_K, x·W_V</text></g>
+  <g class="node" id="n-kv"><rect x="346" y="296" width="92" height="44" rx="8"/>
+    <text x="392" y="315">KV-cache</text><text class="sub" x="392" y="331">K, V of past</text></g>
+  <path class="flow" d="M330,311 H344" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M392,340 V372 H332" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M220,326 V340" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-attn"><rect x="110" y="342" width="220" height="66" rx="8"/>
+    <text x="220" y="362">Multi-head attention</text>
+    <text class="sub" x="220" y="379">softmax(mask(Q·Kᵀ/√d_h))·V</text>
+    <text class="sub" x="220" y="396" data-fmt="{H} heads × d_h {D}">H heads × d_h</text></g>
+  <text class="badge" id="llmsim-head-badge" x="392" y="400" text-anchor="middle"></text>
+  <path class="flow" d="M220,408 V424" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-concat"><rect x="110" y="426" width="220" height="44" rx="8"/>
+    <text x="220" y="445">Concat heads · W_O</text><text class="sub" x="220" y="461" data-fmt="({C}×{C})">mix the heads</text></g>
+  <path class="flow" d="M220,470 V477" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add1"><circle cx="220" cy="488" r="11"/><text x="220" y="493">+</text></g>
+  <path class="flow" d="M220,499 V520" marker-end="url(#llmsim-arr)"/>
+
+  <!-- feed-forward half -->
+  <path class="residual" d="M220,510 H60 V670 H209" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-ln2"><rect x="110" y="522" width="220" height="34" rx="8"/>
+    <text x="220" y="544">LayerNorm 2</text></g>
+  <path class="flow" d="M220,556 V572" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-ffn"><rect x="110" y="574" width="220" height="66" rx="8"/>
+    <text x="220" y="594">Feed-forward (per token)</text>
+    <text class="sub" x="220" y="611">W₁ → GELU → W₂</text>
+    <text class="sub" x="220" y="628" data-fmt="{C} → {F} → {C}">d → d_ff → d</text></g>
+  <path class="flow" d="M220,640 V659" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add2"><circle cx="220" cy="670" r="11"/><text x="220" y="675">+</text></g>
+  <path class="flow" d="M220,681 V726" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="232" y="712">to the next block</text>
+
+  <!-- output side -->
+  <g class="node" id="n-lnf"><rect x="110" y="728" width="220" height="34" rx="8"/>
+    <text x="220" y="750">Final LayerNorm</text></g>
+  <path class="flow" d="M220,762 V776" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-head"><rect x="110" y="778" width="220" height="44" rx="8"/>
+    <text x="220" y="797">Unembedding W_U</text><text class="sub" x="220" y="813" data-fmt="logits: {V} scores per position">logits: one score per token</text></g>
+  <path class="flow" d="M220,822 V836" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-softmax"><rect x="110" y="838" width="220" height="44" rx="8"/>
+    <text x="220" y="857">Softmax</text><text class="sub" x="220" y="873">probabilities of the next token</text></g>
+  <path class="flow" d="M220,882 V896" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-sample"><rect x="110" y="898" width="220" height="44" rx="8"/>
+    <text x="220" y="917">Sampling</text><text class="sub" x="220" y="933">temperature · top-k · top-p</text></g>
+  <path class="flow" d="M220,942 V960" marker-end="url(#llmsim-arr)"/>
+  <text class="title" x="220" y="978" text-anchor="middle">next token</text>
+
+  <!-- autoregressive loop -->
+  <path class="loop" d="M262,974 H462 V38 H332" marker-end="url(#llmsim-arr-accent)"/>
+  <text class="label" x="470" y="520" transform="rotate(90 470 520)" text-anchor="middle">appended to the text: repeat for the next token</text>
+</svg>

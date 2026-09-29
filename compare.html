@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-weight LLMs</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --border: #e2e2e0;
+  --accent: #6a3fd1; --accent-soft: #efe9fb; --grid: #ebebe8; --code-bg: #f1f0ee;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --seq-light: #86b6ef; --seq-dark: #1c5cab; --connector: #b9b8b3; --ref: #9a9aa0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151517; --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #34343a;
+    --accent: #b49bff; --accent-soft: #2c2640; --grid: #2c2c31; --code-bg: #28282c;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --seq-light: #184f95; --seq-dark: #6da7ec; --connector: #55555c; --ref: #7a7a82;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151517; --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #34343a;
+  --accent: #b49bff; --accent-soft: #2c2640; --grid: #2c2c31; --code-bg: #28282c;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --seq-light: #184f95; --seq-dark: #6da7ec; --connector: #55555c; --ref: #7a7a82;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: center; gap: 14px; padding: 14px 24px; background: var(--panel);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 3; }
+header h1 { font-size: 18px; margin: 0; }
+header a { color: var(--accent); text-decoration: none; font-size: 14px; }
+header .spacer { flex: 1; }
+button { font: inherit; font-size: 13px; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+main { max-width: 1240px; margin: 0 auto; padding: 22px 24px 60px; }
+p.lead { max-width: 860px; color: var(--text); }
+.note { color: var(--muted); font-size: 13px; }
+section { margin-top: 34px; }
+section h2 { font-size: 19px; margin: 0 0 4px; }
+section > p { max-width: 860px; margin: 4px 0 14px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 18px; }
+.kpi .v { font-size: 30px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi .l { color: var(--muted); font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+svg.chart { display: block; width: 100%; overflow: visible; }
+svg.chart text { fill: var(--text); font-size: 12px; }
+svg.chart .muted { fill: var(--muted); }
+svg.chart .ref { fill: var(--ref); }
+svg.chart .grid { stroke: var(--grid); stroke-width: 1; }
+svg.chart .hit { fill: transparent; cursor: default; }
+svg.chart .row:hover .hit { fill: var(--accent-soft); }
+#tip { position: fixed; pointer-events: none; background: var(--panel); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 6px 18px rgba(0,0,0,.18); display: none; z-index: 10; max-width: 320px; }
+#tip b { display: block; margin-bottom: 2px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 14px; }
+.controls input[type=search] { font: inherit; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--panel); color: var(--text); min-width: 220px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; width: max-content; min-width: 100%; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--border); text-align: right; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; }
+th:hover { color: var(--accent); }
+th.left, td.left { text-align: left; }
+td.wrap { white-space: normal; max-width: 300px; text-align: left; }
+tr.reference td { color: var(--muted); background: var(--bg); }
+td .sub { display: block; color: var(--muted); font-size: 12px; }
+td a { color: var(--accent); text-decoration: none; }
+.tag { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); margin-left: 4px; }
+.arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+select { font: inherit; font-size: 14px; color: var(--text); background: var(--panel); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px; max-width: 100%; }
+svg.arch .box { fill: var(--panel); stroke: var(--border); stroke-width: 1.3; }
+svg.arch .block { fill: none; stroke: var(--border); stroke-width: 1.3; stroke-dasharray: 6 4; }
+svg.arch .flow { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg.arch .title { font-size: 15px; font-weight: 650; }
+svg.arch .h { font-size: 13px; font-weight: 600; }
+svg.arch .s { font-size: 11.5px; fill: var(--muted); }
+svg.arch .cell { cursor: default; }
+tbody tr { cursor: pointer; }
+dl.glossary { display: grid; grid-template-columns: 200px 1fr; gap: 10px 18px; margin: 0; }
+dl.glossary dt { font-weight: 600; }
+dl.glossary dd { margin: 0; }
+dl.glossary dd .sim { color: var(--muted); font-size: 13px; display: block; }
+@media (max-width: 720px) {
+  main { padding: 16px; }
+  header { padding: 12px 16px; }
+  dl.glossary { grid-template-columns: 1fr; }
+  dl.glossary dd { margin-bottom: 8px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Open-weight LLMs</h1>
+  <a id="back" href="index.html">← simulator results</a>
+  <span class="spacer"></span>
+  <button id="theme" title="toggle theme">◐</button>
+</header>
+<main>
+  <p class="lead">The latest open-weight models of the main labs, side by side, with the numbers that describe their
+  architecture. Grey rows are for scale: GPT-2 and the models this simulator runs. The architecture fields come from each
+  model's official <code>config.json</code>; total and active parameters are the values declared in the model cards.</p>
+  <p class="note" id="meta"></p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2>Total and active parameters</h2>
+    <p>A Mixture-of-Experts model stores many experts but each token only goes through a few of them: the dark dot is what
+    one token actually uses, the hollow one is everything that must be kept in memory. The scale is logarithmic: every
+    grid line is 100× the previous one.</p>
+    <div class="card">
+      <div class="legend"><span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--seq-light)" stroke-width="2.5"/></svg>total parameters</span>
+        <span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="var(--seq-dark)"/></svg>active per token</span></div>
+      <svg class="chart" id="c-params"></svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>How each layer mixes the tokens</h2>
+    <p>In the simulator every layer uses <b>full attention</b>: each token looks at all the previous ones, which gets
+    expensive with long contexts. Recent models mix in cheaper layers: <b>local</b> attention over a short window,
+    <b>linear attention or state-space</b> layers that keep a fixed-size memory instead of a growing KV-cache, and
+    <b>sparse</b> attention that first selects the relevant tokens.</p>
+    <div class="card">
+      <div class="legend" id="mix-legend"></div>
+      <svg class="chart" id="c-mix"></svg>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <h2>Architecture of each model</h2>
+    <p>The block diagram of any two models, drawn from their configuration. The two strips show every layer in order:
+    what it uses to mix the tokens, and whether its feed-forward is a single dense FFN or a mixture of experts. The
+    grid of squares is the set of experts of one MoE layer, with the few that a token uses highlighted. Click a model
+    in the charts or in the table to open it here.</p>
+    <div class="controls">
+      <label for="arch-a">Model</label><select id="arch-a"></select>
+      <label for="arch-b">compared with</label><select id="arch-b"></select>
+    </div>
+    <div class="arch-grid"><div class="card"><svg class="chart arch" id="arch-svg-a"></svg></div>
+      <div class="card"><svg class="chart arch" id="arch-svg-b"></svg></div></div>
+  </section>
+
+  <section>
+    <h2>Vocabulary</h2>
+    <p>Vocabularies have grown from 50k tokens (GPT-2) to 100k–260k, to cover many languages and code with fewer tokens.
+    The embedding tables (vocabulary × d_model, twice when input and output are not shared) are a large part of small
+    models and a tiny part of large ones: hover a bar to see it.</p>
+    <div class="card"><svg class="chart" id="c-vocab"></svg></div>
+  </section>
+
+  <section>
+    <h2>All the numbers</h2>
+    <div class="controls">
+      <input type="search" id="q" placeholder="filter: name, lab, attention…">
+      <label><input type="checkbox" id="moe-only"> MoE only</label>
+      <label><input type="checkbox" id="refs" checked> reference models</label>
+      <span class="note">click a column title to sort</span>
+    </div>
+    <div class="tablewrap"><table id="tbl"></table></div>
+  </section>
+
+  <section>
+    <h2>Glossary</h2>
+    <div class="card"><dl class="glossary" id="glossary"></dl></div>
+  </section>
+</main>
+<div id="tip"></div>
+<script type="application/json" id="data">{"fetched": "2026-09-26", "source": "Hugging Face config.json and model cards", "models": [{"id": "deepseek-ai/DeepSeek-V4.1-Flash", "name": "DeepSeek-V4.1-Flash", "lab": "DeepSeek", "total": 552, "active": 16, "params_source": "model card: 552B backbone; 8B active in prefill, 16B in decode", "attention": "Compressed sparse attention (CSA2: indexer top-512, KV shared across layers) + sliding window 128; 1 KV head of 512", "extras": ["causal encoder-decoder (20 + 20 layers)", "Engram conditional memory: +196B parameters looked up by token", "3 multi-token-prediction layers", "FP4 experts", "vision input"], "layers": 40, "d_model": 5120, "heads": 64, "kv_heads": 1, "head_dim": 512, "ffn": 20480, "expert_ffn": 2304, "experts": 384, "experts_active": 6, "experts_shared": 1, "vocab": 129280, "context": 1048576, "rope_theta": 10000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": null, "multimodal": true, "model_type": "deepseek_v41_text", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 40}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-09-10", "license": "mit", "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash", "config_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash", "embedding_params": 1323827200, "embedding_share": 0.00239823768115942, "moe": true, "active_share": 0.028985507246376812}, {"id": "deepseek-ai/DeepSeek-V4-Pro-0813", "name": "DeepSeek-V4-Pro (0813)", "lab": "DeepSeek", "total": 1600, "active": 49, "params_source": "DeepSeek-V4-Pro model card (same architecture): 1.6T / 49B", "attention": "Compressed sparse attention (KV compressed 4× or 128×, alternating) + indexer top-1024 + sliding window 128; 1 KV head of 512", "extras": ["low-rank query/output projections", "3 hash-routed layers", "1 multi-token-prediction layer", "FP4 experts"], "layers": 61, "d_model": 7168, "heads": 128, "kv_heads": 1, "head_dim": 512, "ffn": 28672, "expert_ffn": 3072, "experts": 384, "experts_active": 6, "experts_shared": 1, "vocab": 129280, "context": 1048576, "rope_theta": 10000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "deepseek_v4", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 61}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-13", "license": "mit", "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813", "config_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813", "embedding_params": 1853358080, "embedding_share": 0.0011583488, "moe": true, "active_share": 0.030625}, {"id": "Qwen/Qwen3.8-2.4T-A95B", "name": "Qwen3.8-2.4T-A95B", "lab": "Qwen (Alibaba)", "total": 2400, "active": 95, "params_source": "model card: 2.4T total, 95B activated", "attention": "Hybrid: 3 linear-attention layers (DeltaNet-style) for every full-attention layer (GQA 64/4, gated output)", "extras": ["1 multi-token-prediction layer", "RoPE on 25% of the head dims"], "layers": 92, "d_model": 8192, "heads": 64, "kv_heads": 4, "head_dim": 256, "ffn": 32768, "expert_ffn": 2048, "experts": 512, "experts_active": 10, "experts_shared": 1, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 69, "full_attention": 23}, "multimodal": false, "model_type": "qwen3_5_moe_text", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 23, "linear": 69}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-08", "license": "other", "url": "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B", "config_url": "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B", "embedding_params": 4068474880, "embedding_share": 0.0016951978666666667, "moe": true, "active_share": 0.03958333333333333}, {"id": "Qwen/Qwen3.8-Flash-Next", "name": "Qwen3.8-Flash-Next", "lab": "Qwen (Alibaba)", "total": 125, "active": 6, "params_source": "model card: 125B with 6B activated, plus 51B n-gram embedding and 4B MTP", "attention": "Hybrid 3 linear : 1 full (GQA 24/2), full layers with a sparse indexer (budget 2048 tokens)", "extras": ["n-gram embeddings: +51B parameters", "per-layer embeddings", "vision input"], "layers": 48, "d_model": 2560, "heads": 24, "kv_heads": 2, "head_dim": 256, "ffn": 10240, "expert_ffn": 640, "experts": 512, "experts_active": 10, "experts_shared": 1, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 36, "full_attention": 12}, "multimodal": true, "model_type": "qwen4_exp_text", "mix_seq": "NNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"linear": 36, "sparse": 12}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-24", "license": "other", "url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next", "config_url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next", "embedding_params": 1271398400, "embedding_share": 0.0101711872, "moe": true, "active_share": 0.048}, {"id": "Qwen/Qwen3.8-27B", "name": "Qwen3.8-27B", "lab": "Qwen (Alibaba)", "total": 27, "active": null, "params_source": "model name (27.8B stored, vision encoder included)", "attention": "Hybrid 3 linear : 1 full (GQA 24/4, gated output)", "extras": ["vision input", "1 MTP layer"], "layers": 64, "d_model": 5120, "heads": 24, "kv_heads": 4, "head_dim": 256, "ffn": 17408, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 48, "full_attention": 16}, "multimodal": true, "model_type": "qwen3_5_text", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 16, "linear": 48}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-05", "license": "apache-2.0", "url": "https://huggingface.co/Qwen/Qwen3.8-27B", "config_url": "https://huggingface.co/Qwen/Qwen3.8-27B", "embedding_params": 2542796800, "embedding_share": 0.09417765925925926, "moe": false, "active_share": null}, {"id": "moonshotai/Kimi-K3", "name": "Kimi K3", "lab": "Moonshot AI", "total": 2800, "active": 104, "params_source": "model card: 2.8T total, 104B activated", "attention": "Hybrid: 69 Kimi Delta Attention (linear) + 24 gated MLA layers", "kv_note": "MLA latent 512", "extras": ["latent MoE (experts work in a 3584-dim space)", "SiTU activation", "vision input"], "layers": 93, "d_model": 7168, "heads": 96, "kv_heads": 96, "head_dim": 192, "ffn": 33792, "expert_ffn": 3072, "experts": 896, "experts_active": 16, "experts_shared": 2, "vocab": 163840, "context": 1048576, "rope_theta": null, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "situ", "mtp_layers": 0, "layer_mix": {"linear_attention": 69, "full_attention": 24}, "multimodal": true, "model_type": "kimi_linear", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 24, "linear": 69}, "norm": "RMSNorm", "ffn_kind": "SiTU", "released": "2026-06-13", "license": "other", "url": "https://huggingface.co/moonshotai/Kimi-K3", "config_url": "https://huggingface.co/moonshotai/Kimi-K3", "embedding_params": 2348810240, "embedding_share": 0.0008388608, "moe": true, "active_share": 0.037142857142857144}, {"id": "zai-org/GLM-5.3", "name": "GLM-5.3", "lab": "Z.ai", "total": 744, "active": 40, "params_source": "GLM-5 model card (same configuration): 744B / 40B", "attention": "MLA (KV latent 512) + DeepSeek Sparse Attention (indexer top-2048)", "kv_note": "MLA latent 512", "extras": ["first 3 layers dense", "1 MTP layer", "FP8 weights"], "layers": 78, "d_model": 6144, "heads": 64, "kv_heads": 64, "head_dim": 192, "ffn": 12288, "expert_ffn": 2048, "experts": 256, "experts_active": 8, "experts_shared": 1, "vocab": 154880, "context": 1048576, "rope_theta": 8000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "glm_moe_dsa", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 78}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-25", "license": "other", "url": "https://huggingface.co/zai-org/GLM-5.3", "config_url": "https://huggingface.co/zai-org/GLM-5.3", "embedding_params": 1903165440, "embedding_share": 0.002558018064516129, "moe": true, "active_share": 0.053763440860215055}, {"id": "MiniMaxAI/MiniMax-M2.7", "name": "MiniMax-M2.7", "lab": "MiniMax", "total": 230, "active": 10, "params_source": "MiniMax-M2 model card (same configuration): 230B / 10B", "attention": "Full attention in every layer, GQA 48/8, QK-norm", "extras": ["3 multi-token-prediction modules", "partial RoPE (64 of 128 dims)", "FP8 weights"], "layers": 62, "d_model": 3072, "heads": 48, "kv_heads": 8, "head_dim": 128, "ffn": 1536, "expert_ffn": null, "experts": 256, "experts_active": 8, "experts_shared": 0, "vocab": 200064, "context": 204800, "rope_theta": 5000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": null, "multimodal": false, "model_type": "minimax_m2", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 62}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-04-09", "license": "other", "url": "https://huggingface.co/MiniMaxAI/MiniMax-M2.7", "config_url": "https://huggingface.co/MiniMaxAI/MiniMax-M2.7", "embedding_params": 1229193216, "embedding_share": 0.005344318330434783, "moe": true, "active_share": 0.043478260869565216}, {"id": "XiaomiMiMo/MiMo-V2.6-Pro-RL", "name": "MiMo-V2.6-Pro", "lab": "Xiaomi", "total": 1020, "active": 42, "params_source": "model card: 1.02T total / 42B activated", "attention": "Hybrid: sliding window 128 and full attention (GQA 128/8), attention sinks", "extras": ["3 MTP layers", "audio + vision input", "context 1M"], "layers": 70, "d_model": 6144, "heads": 128, "kv_heads": 8, "head_dim": 192, "ffn": 16384, "expert_ffn": 2048, "experts": 384, "experts_active": 8, "experts_shared": 0, "vocab": 152576, "context": 1048576, "rope_theta": 10000000, "rope_partial": 0.334, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"full_attention": 10, "sliding_attention": 60}, "multimodal": true, "model_type": "mimo_v2", "mix_seq": "FLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLFLLLLLLF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 10, "local": 60}, "norm": null, "ffn_kind": "SwiGLU", "released": "2026-09-21", "license": "mit", "url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL", "config_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL", "embedding_params": 1874853888, "embedding_share": 0.0018380920470588236, "moe": true, "active_share": 0.041176470588235294}, {"id": "XiaomiMiMo/MiMo-V2.6-Flash-RL", "name": "MiMo-V2.6-Flash", "lab": "Xiaomi", "total": 309, "active": 15, "params_source": "model card: 309B total / 15B activated", "attention": "Hybrid: sliding window 128 and full attention (GQA 64/4), attention sinks", "extras": ["3 MTP layers", "audio + vision input", "context 1M"], "layers": 48, "d_model": 4096, "heads": 64, "kv_heads": 4, "head_dim": 192, "ffn": 16384, "expert_ffn": 2048, "experts": 256, "experts_active": 8, "experts_shared": 0, "vocab": 152576, "context": 1048576, "rope_theta": 10000000.0, "rope_partial": 0.334, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": {"full_attention": 9, "sliding_attention": 39}, "multimodal": true, "model_type": "mimo_v2", "mix_seq": "FLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 9, "local": 39}, "norm": null, "ffn_kind": "SwiGLU", "released": "2026-09-21", "license": "mit", "url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL", "config_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL", "embedding_params": 1249902592, "embedding_share": 0.004044992207119741, "moe": true, "active_share": 0.04854368932038835}, {"id": "google/gemma-4-31B-it", "name": "Gemma 4 31B", "lab": "Google", "total": 30.7, "active": null, "params_source": "model card: 30.7B", "attention": "5 sliding-window (1024) layers per full-attention layer; GQA 32/16 (global layers 4 KV heads of 512)", "extras": ["tied embeddings", "vision input"], "layers": 60, "d_model": 5376, "heads": 32, "kv_heads": 16, "head_dim": 256, "ffn": 21504, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 262144, "context": 262144, "rope_theta": 1000000.0, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": true, "activation": "gelu_pytorch_tanh", "mtp_layers": null, "layer_mix": {"sliding_attention": 50, "full_attention": 10}, "multimodal": true, "model_type": "gemma4_text", "mix_seq": "LLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 10, "local": 50}, "norm": "RMSNorm", "ffn_kind": "GeGLU (tanh)", "released": "2026-03-11", "license": "apache-2.0", "url": "https://huggingface.co/google/gemma-4-31B-it", "config_url": "https://huggingface.co/google/gemma-4-31B-it", "embedding_params": 1409286144, "embedding_share": 0.0459050861237785, "moe": false, "active_share": null}, {"id": "google/gemma-4-26B-A4B-it", "name": "Gemma 4 26B-A4B", "lab": "Google", "total": 25.2, "active": 3.8, "params_source": "model card: 25.2B total / 3.8B active", "attention": "5 sliding-window (1024) layers per full-attention layer; GQA 16/8", "extras": ["MoE block next to a small dense FFN", "tied embeddings", "vision input"], "layers": 30, "d_model": 2816, "heads": 16, "kv_heads": 8, "head_dim": 256, "ffn": 2112, "expert_ffn": 704, "experts": 128, "experts_active": 8, "experts_shared": 0, "vocab": 262144, "context": 262144, "rope_theta": 1000000.0, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": true, "activation": "gelu_pytorch_tanh", "mtp_layers": null, "layer_mix": {"sliding_attention": 25, "full_attention": 5}, "multimodal": true, "model_type": "gemma4_text", "mix_seq": "LLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 5, "local": 25}, "norm": "RMSNorm", "ffn_kind": "GeGLU (tanh)", "released": "2026-03-11", "license": "apache-2.0", "url": "https://huggingface.co/google/gemma-4-26B-A4B-it", "config_url": "https://huggingface.co/google/gemma-4-26B-A4B-it", "embedding_params": 738197504, "embedding_share": 0.029293551746031744, "moe": true, "active_share": 0.15079365079365079}, {"id": "openai/gpt-oss-120b", "name": "gpt-oss-120b", "lab": "OpenAI", "total": 117, "active": 5.1, "params_source": "model card: 117B / 5.1B active", "attention": "Alternating sliding window (128) and full attention, GQA 64/8, attention sinks", "extras": ["MXFP4 experts (fits one 80 GB GPU)", "o200k tokenizer"], "layers": 36, "d_model": 2880, "heads": 64, "kv_heads": 8, "head_dim": 64, "ffn": 2880, "expert_ffn": null, "experts": 128, "experts_active": 4, "experts_shared": 0, "vocab": 201088, "context": 131072, "rope_theta": 150000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 18, "full_attention": 18}, "multimodal": false, "model_type": "gpt_oss", "mix_seq": "LFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 18, "local": 18}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-08-04", "license": "apache-2.0", "url": "https://huggingface.co/openai/gpt-oss-120b", "config_url": "https://huggingface.co/openai/gpt-oss-120b", "embedding_params": 1158266880, "embedding_share": 0.009899716923076923, "moe": true, "active_share": 0.04358974358974359}, {"id": "openai/gpt-oss-20b", "name": "gpt-oss-20b", "lab": "OpenAI", "total": 21, "active": 3.6, "params_source": "model card: 21B / 3.6B active", "attention": "Alternating sliding window (128) and full attention, GQA 64/8, attention sinks", "extras": ["MXFP4 experts", "o200k tokenizer"], "layers": 24, "d_model": 2880, "heads": 64, "kv_heads": 8, "head_dim": 64, "ffn": 2880, "expert_ffn": null, "experts": 32, "experts_active": 4, "experts_shared": 0, "vocab": 201088, "context": 131072, "rope_theta": 150000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 12, "full_attention": 12}, "multimodal": false, "model_type": "gpt_oss", "mix_seq": "LFLFLFLFLFLFLFLFLFLFLFLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 12, "local": 12}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-08-04", "license": "apache-2.0", "url": "https://huggingface.co/openai/gpt-oss-20b", "config_url": "https://huggingface.co/openai/gpt-oss-20b", "embedding_params": 1158266880, "embedding_share": 0.05515556571428572, "moe": true, "active_share": 0.17142857142857143}, {"id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct", "name": "Llama 4 Maverick", "lab": "Meta", "total": 400, "active": 17, "params_source": "Meta: 400B total / 17B active (config read from a public mirror, the original is gated)", "attention": "Chunked attention (8192) with RoPE in 3 of 4 layers, the 4th without positions (NoPE); GQA 40/8", "extras": ["MoE only in every other layer, 1 routed + 1 shared expert", "vision input"], "layers": 48, "d_model": 5120, "heads": 40, "kv_heads": 8, "head_dim": 128, "ffn": 8192, "expert_ffn": null, "experts": 128, "experts_active": 1, "experts_shared": 1, "vocab": 202048, "context": 1048576, "rope_theta": 500000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": "llama4_text", "mix_seq": "LLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDE", "mixers": {"full": 12, "local": 36}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-04-01", "license": "other", "url": "https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct", "config_url": "https://huggingface.co/unsloth/Llama-4-Maverick-17B-128E-Instruct", "embedding_params": 2068971520, "embedding_share": 0.0051724288, "moe": true, "active_share": 0.0425}, {"id": "mistralai/Mistral-Large-3-675B-Instruct-2512", "name": "Mistral Large 3", "lab": "Mistral AI", "total": 675, "active": 41, "params_source": "model card: 675B total / 41B active (language model 673B / 39B)", "attention": "MLA (KV latent 512, query latent 1536), 128 heads", "kv_note": "MLA latent 512", "extras": ["first 3 layers dense", "vision input", "config from params.json (Mistral format)"], "layers": 61, "d_model": 7168, "heads": 128, "kv_heads": 128, "head_dim": 192, "ffn": 16384, "expert_ffn": 4096, "experts": 128, "experts_active": 4, "experts_shared": 1, "vocab": 131072, "context": 294912, "rope_theta": 10000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": null, "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": null, "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 61}, "norm": "RMSNorm", "ffn_kind": null, "released": "2025-11-28", "license": "apache-2.0", "url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512", "config_url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512", "embedding_params": 1879048192, "embedding_share": 0.0027837750992592593, "moe": true, "active_share": 0.06074074074074074}, {"id": "mistralai/Mistral-Medium-3.5-128B", "name": "Mistral Medium 3.5", "lab": "Mistral AI", "total": 128, "active": null, "params_source": "model name", "attention": "Full attention, GQA 96/8", "extras": ["vision input", "FP8 weights"], "layers": 88, "d_model": 12288, "heads": 96, "kv_heads": 8, "head_dim": 128, "ffn": 28672, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 131072, "context": 262144, "rope_theta": 1000000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": "ministral3", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 88}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-03-31", "license": "other", "url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B", "config_url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B", "embedding_params": 3221225472, "embedding_share": 0.025165824, "moe": false, "active_share": null}, {"id": "tencent/Hy3", "name": "Hy3", "lab": "Tencent", "total": 295, "active": 21, "params_source": "model card: 295B / 21B activated (+3.8B MTP)", "attention": "Full attention, GQA 64/8, QK-norm", "extras": ["first layer dense", "1 MTP layer"], "layers": 80, "d_model": 4096, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 13312, "expert_ffn": 1536, "experts": 192, "experts_active": 8, "experts_shared": 1, "vocab": 120832, "context": 262144, "rope_theta": 11158840.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "hy_v3", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 80}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-07-02", "license": "apache-2.0", "url": "https://huggingface.co/tencent/Hy3", "config_url": "https://huggingface.co/tencent/Hy3", "embedding_params": 989855744, "embedding_share": 0.0033554432, "moe": true, "active_share": 0.0711864406779661}, {"id": "inclusionAI/Ling-3.0-flash", "name": "Ling-3.0-flash", "lab": "Ant Group (inclusionAI)", "total": 124, "active": 5.1, "params_source": "model card: 124B total / 5.1B active", "attention": "Hybrid: 5 Kimi Delta Attention (linear) layers per MLA layer", "kv_note": "MLA latent 512", "extras": ["first 2 layers dense", "1 MTP layer"], "layers": 42, "d_model": 2560, "heads": 32, "kv_heads": 32, "head_dim": 128, "ffn": 6144, "expert_ffn": 768, "experts": 512, "experts_active": 8, "experts_shared": 1, "vocab": 157184, "context": 262144, "rope_theta": 6000000, "rope_partial": 0.5, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "bailing_hybrid", "mix_seq": "NNNNNFNNNNNFNNNNNFNNNNNFNNNNNFNNNNNFNNNNNF", "ffn_seq": "DDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 7, "linear": 35}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-02", "license": "mit", "url": "https://huggingface.co/inclusionAI/Ling-3.0-flash", "config_url": "https://huggingface.co/inclusionAI/Ling-3.0-flash", "embedding_params": 804782080, "embedding_share": 0.006490178064516129, "moe": true, "active_share": 0.04112903225806451}, {"id": "stepfun-ai/Step-3.5-Flash", "name": "Step 3.5 Flash", "lab": "StepFun", "total": 196.8, "active": 11, "params_source": "model card: 196.81B total / ~11B active", "attention": "1 full-attention layer per 3 sliding-window (512) layers, GQA with 8 groups, head-wise gate", "extras": ["first 3 layers dense", "3 MTP layers"], "layers": 45, "d_model": 4096, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 11264, "expert_ffn": 1280, "experts": 288, "experts_active": 8, "experts_shared": 1, "vocab": 128896, "context": 262144, "rope_theta": 5000000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": null, "mtp_layers": 3, "layer_mix": {"full_attention": 12, "sliding_attention": 36}, "multimodal": false, "model_type": "step3p5", "mix_seq": "FLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 12, "local": 33}, "norm": null, "ffn_kind": null, "released": "2026-02-01", "license": "apache-2.0", "url": "https://huggingface.co/stepfun-ai/Step-3.5-Flash", "config_url": "https://huggingface.co/stepfun-ai/Step-3.5-Flash", "embedding_params": 1055916032, "embedding_share": 0.005365426991869919, "moe": true, "active_share": 0.05589430894308943}, {"id": "ibm-granite/granite-4.2-30b", "name": "Granite 4.2 30B", "lab": "IBM", "total": 29.3, "active": null, "params_source": "stored parameters (BF16)", "attention": "Full attention, GQA 32/8", "extras": [], "layers": 64, "d_model": 4096, "heads": 32, "kv_heads": 8, "head_dim": 128, "ffn": 32768, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 100352, "context": 131072, "rope_theta": 50000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": false, "model_type": "granite", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 64}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-07", "license": "apache-2.0", "url": "https://huggingface.co/ibm-granite/granite-4.2-30b", "config_url": "https://huggingface.co/ibm-granite/granite-4.2-30b", "embedding_params": 822083584, "embedding_share": 0.028057460204778156, "moe": false, "active_share": null}, {"id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "name": "Nemotron 3 Super", "lab": "NVIDIA", "total": 120, "active": 12, "params_source": "model card: 120B total / 12B active", "attention": "Hybrid: mostly Mamba-2 (state-space) layers, a few attention layers (GQA 32/2)", "extras": ["latent MoE (experts in a 1024-dim space)", "squared-ReLU activation", "1 MTP layer"], "layers": 88, "d_model": 4096, "heads": 32, "kv_heads": 2, "head_dim": 128, "ffn": 2688, "expert_ffn": 2688, "experts": 512, "experts_active": 22, "experts_shared": 1, "vocab": 131072, "context": 262144, "rope_theta": 10000, "rope_partial": 1.0, "positions": "RoPE", "tied_embeddings": false, "activation": "relu2", "mtp_layers": 1, "layer_mix": {"mamba2": 40, "moe": 40, "full_attention": 8}, "multimodal": false, "model_type": "nemotron_h", "mix_seq": "M-M-M-MF-M-M-M-MF-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-MF-M-M-M-M-", "ffn_seq": "-E-E-E--E-E-E-E--E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E--E-E-E-E-E", "mixers": {"full": 8, "linear": 40}, "norm": null, "ffn_kind": "squared ReLU", "released": "2026-03-10", "license": "other", "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "config_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "embedding_params": 1073741824, "embedding_share": 0.008947848533333334, "moe": true, "active_share": 0.1}, {"id": "allenai/Olmo-3.1-32B-Instruct", "name": "OLMo 3.1 32B", "lab": "Ai2", "total": 32.2, "active": null, "params_source": "stored parameters (BF16)", "attention": "3 sliding-window (4096) layers per full-attention layer, GQA 40/8", "extras": ["fully open: data and training code published"], "layers": 64, "d_model": 5120, "heads": 40, "kv_heads": 8, "head_dim": 128, "ffn": 27648, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 100278, "context": 65536, "rope_theta": 500000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 48, "full_attention": 16}, "multimodal": false, "model_type": "olmo3", "mix_seq": "LLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 16, "local": 48}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-12-10", "license": "apache-2.0", "url": "https://huggingface.co/allenai/Olmo-3.1-32B-Instruct", "config_url": "https://huggingface.co/allenai/Olmo-3.1-32B-Instruct", "embedding_params": 1026846720, "embedding_share": 0.03188964968944099, "moe": false, "active_share": null}, {"id": "baidu/ERNIE-4.5-300B-A47B-PT", "name": "ERNIE 4.5 300B-A47B", "lab": "Baidu", "total": 300, "active": 47, "params_source": "model card: 300B total / 47B activated", "attention": "Full attention, GQA 64/8", "extras": ["first 3 layers dense", "1 MTP layer"], "layers": 54, "d_model": 8192, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 28672, "expert_ffn": 3584, "experts": 64, "experts_active": 8, "experts_shared": 0, "vocab": 103424, "context": 131072, "rope_theta": 500000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "ernie4_5_moe", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 54}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-06-28", "license": "apache-2.0", "url": "https://huggingface.co/baidu/ERNIE-4.5-300B-A47B-PT", "config_url": "https://huggingface.co/baidu/ERNIE-4.5-300B-A47B-PT", "embedding_params": 1694498816, "embedding_share": 0.005648329386666666, "moe": true, "active_share": 0.15666666666666668}, {"id": "openai-community/gpt2", "name": "GPT-2 small (2019)", "lab": "OpenAI", "reference": true, "total": 0.124, "active": null, "params_source": "OpenAI: 124M", "attention": "Full attention, 12 heads (no GQA)", "extras": ["learned positions", "LayerNorm, GELU"], "layers": 12, "d_model": 768, "heads": 12, "kv_heads": 12, "head_dim": 64, "ffn": 3072, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 50257, "context": 1024, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": true, "activation": "gelu_new", "mtp_layers": null, "layer_mix": null, "multimodal": false, "model_type": "gpt2", "mix_seq": "FFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDD", "mixers": {"full": 12}, "norm": "LayerNorm", "ffn_kind": "GELU", "released": "2022-03-02", "license": "mit", "url": "https://huggingface.co/openai-community/gpt2", "config_url": "https://huggingface.co/openai-community/gpt2", "embedding_params": 38597376, "embedding_share": 0.31126916129032256, "moe": false, "active_share": null}, {"id": "roneneldan/TinyStories-1M", "name": "TinyStories-1M (2023)", "lab": "Microsoft Research", "reference": true, "total": 0.0037, "active": null, "params_source": "3.7M stored (1M excluding embeddings)", "attention": "Alternating global and local (256) attention, 16 heads", "extras": ["opens in this simulator"], "layers": 8, "d_model": 64, "heads": 16, "kv_heads": 16, "head_dim": 4, "ffn": 256, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 50257, "context": 2048, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": true, "activation": "gelu_new", "mtp_layers": null, "layer_mix": {"full_attention": 4, "sliding_attention": 4}, "multimodal": false, "model_type": "gpt_neo", "mix_seq": "FLFLFLFL", "ffn_seq": "DDDDDDDD", "mixers": {"full": 4, "local": 4}, "norm": "LayerNorm", "ffn_kind": "GELU", "released": "2023-05-12", "license": "see model card", "url": "https://huggingface.co/roneneldan/TinyStories-1M", "config_url": "https://huggingface.co/roneneldan/TinyStories-1M", "embedding_params": 3216448, "embedding_share": 0.8693102702702703, "moe": false, "active_share": null}, {"id": null, "name": "LLM-Sim tiny (this project)", "lab": "LLM-Sim", "reference": true, "total": 9.184e-06, "active": null, "params_source": "weights/tiny.npz", "attention": "Full attention, 2 heads", "extras": ["character tokenizer", "trains in 2 minutes"], "layers": 2, "d_model": 16, "heads": 2, "kv_heads": 2, "head_dim": 8, "ffn": 64, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 65, "context": 32, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": false, "activation": "gelu", "mtp_layers": null, "layer_mix": {"full_attention": 2}, "mixers": {"full": 2}, "multimodal": false, "mix_seq": "FF", "ffn_seq": "DD", "norm": "LayerNorm", "ffn_kind": "GELU", "model_type": "llmsim", "released": "2026-09-25", "license": "-", "url": null, "config_url": null, "embedding_params": 2080, "embedding_share": 0.2264808362369338, "moe": false, "active_share": null}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const MODELS = DATA.models;
+const NS = "http://www.w3.org/2000/svg";
+const MIX = [["full", "full attention", "--series-1"], ["local", "local (sliding / chunked)", "--series-2"],
+             ["linear", "linear or state-space", "--series-3"], ["sparse", "sparse (selected tokens)", "--series-4"]];
+
+function el(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function h(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function params(b) {          // billions -> "2.4T", "95B", "124M", "9.2K"
+  const n = b * 1e9;
+  if (n >= 1e12) return (n / 1e12).toFixed(n >= 1e13 ? 0 : 1).replace(/\.0$/, "") + "T";
+  if (n >= 1e9) return (n / 1e9).toFixed(n >= 1e11 ? 0 : 1).replace(/\.0$/, "") + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e8 ? 0 : 1).replace(/\.0$/, "") + "M";
+  return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+}
+const num = n => n == null ? "–" : n.toLocaleString("en-US");
+const ctx = n => n >= 1000000 ? (n / 1048576).toFixed(n % 1048576 ? 1 : 0) + "M" : Math.round(n / 1024) + "K";
+function color(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+// dark or white text, whichever contrasts more with a segment's colour
+function ink(hex) {
+  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map(u => u <= 0.03928 ? u / 12.92 : ((u + 0.055) / 1.055) ** 2.4);
+  const lum = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  return (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) ? "#111" : "#fff";
+}
+
+const tip = document.getElementById("tip");
+function showTip(ev, html) {
+  tip.innerHTML = html;
+  tip.style.display = "block";
+  const w = tip.offsetWidth, x = ev.clientX + 14;
+  tip.style.left = (x + w > innerWidth - 8 ? ev.clientX - w - 14 : x) + "px";
+  tip.style.top = (ev.clientY + 14) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+// --- header facts -------------------------------------------------------------------------
+document.getElementById("meta").textContent =
+  `Data collected on ${DATA.fetched} from Hugging Face (config.json and model cards). ` +
+  `Where a model card does not state the parameter counts, the table says where they come from.`;
+
+const real = MODELS.filter(m => !m.reference);
+const moe = real.filter(m => m.moe);
+const shares = moe.map(m => m.active / m.total).sort((a, b) => a - b);
+const median = shares[Math.floor(shares.length / 2)];
+const hybrid = real.filter(m => Object.keys(m.mixers).some(k => k !== "full"));
+[[`${moe.length} / ${real.length}`, "models are Mixture-of-Experts"],
+ [`${(100 * median).toFixed(1)}%`, "median share of parameters active per token (MoE models)"],
+ [`${hybrid.length} / ${real.length}`, "models replace some full-attention layers"],
+ [`${params(Math.max(...real.map(m => m.total)))}`, "largest model (total parameters)"],
+ [ctx(Math.max(...real.map(m => m.context))), "longest context window (tokens)"]]
+  .forEach(([v, l]) => { const k = h("div", "card kpi"); k.append(h("div", "v", v), h("div", "l", l)); document.getElementById("kpis").append(k); });
+
+// --- chart helpers ------------------------------------------------------------------------
+const ROW = 24;
+function labelWidth(svg) { return svg.clientWidth < 560 ? 118 : 190; }
+function rowLabel(g, m, x, y) {
+  const t = el("text", { x: x - 10, y: y + 4, "text-anchor": "end", class: m.reference ? "ref" : "" },
+               m.name.length > 30 ? m.name.slice(0, 29) + "…" : m.name);
+  g.append(t);
+}
+
+// 1. total vs active (dumbbell on a log axis)
+function drawParams() {
+  const svg = document.getElementById("c-params");
+  svg.innerHTML = "";
+  const rows = [...MODELS].sort((a, b) => (a.reference - b.reference) || b.total - a.total);
+  const W = svg.clientWidth, L = labelWidth(svg), R = 64, top = 24;
+  svg.setAttribute("height", top + rows.length * ROW + 8);
+  const lo = 3, hi = 13;                             // 10^3 .. 10^13 parameters
+  const x = n => L + (Math.log10(n) - lo) / (hi - lo) * (W - L - R);
+  for (let p = lo + 1; p <= hi; p += 2) {
+    svg.append(el("line", { x1: x(10 ** p), x2: x(10 ** p), y1: top - 6, y2: top + rows.length * ROW, class: "grid" }));
+    svg.append(el("text", { x: x(10 ** p), y: top - 10, "text-anchor": "middle", class: "muted" }, params(10 ** p / 1e9)));
+  }
+  rows.forEach((m, i) => {
+    const y = top + i * ROW + ROW / 2, g = el("g", { class: "row" });
+    g.append(el("rect", { class: "hit", x: 0, y: y - ROW / 2, width: W, height: ROW, rx: 4 }));
+    rowLabel(g, m, L, y);
+    const xt = x(m.total * 1e9);
+    if (m.active) {
+      const xa = x(m.active * 1e9);
+      g.append(el("line", { x1: xa, x2: xt, y1: y, y2: y, stroke: color("--connector"), "stroke-width": 2 }));
+      g.append(el("circle", { cx: xt, cy: y, r: 5.5, fill: color("--panel"), stroke: color("--seq-light"), "stroke-width": 2.5 }));
+      g.append(el("circle", { cx: xa, cy: y, r: 5.5, fill: color("--seq-dark"), stroke: color("--panel"), "stroke-width": 2 }));
+      g.append(el("text", { x: xt + 10, y: y + 4, class: "muted" }, `${params(m.total)} · ${params(m.active)}`));
+    } else {
+      g.append(el("circle", { cx: xt, cy: y, r: 5.5, fill: color(m.reference ? "--ref" : "--seq-dark"), stroke: color("--panel"), "stroke-width": 2 }));
+      g.append(el("text", { x: xt + 10, y: y + 4, class: "muted" }, `${params(m.total)} dense`));
+    }
+    g.addEventListener("click", () => openArch(m));
+    g.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(m.name)}</b>${esc(m.lab)}<br>total ${params(m.total)}` +
+      (m.active ? `<br>active per token ${params(m.active)} (${(100 * m.active / m.total).toFixed(1)}%)` : "<br>dense: every parameter works on every token") +
+      `<br><span style="color:var(--muted)">${esc(m.params_source)}</span>`));
+    g.addEventListener("mouseleave", hideTip);
+    svg.append(g);
+  });
+}
+
+// 2. layer mix (100% stacked bars)
+function drawMix() {
+  const legend = document.getElementById("mix-legend");
+  legend.innerHTML = "";
+  MIX.forEach(([, name, v]) => { const s = h("span"); const sw = h("span", "sw"); sw.style.background = `var(${v})`; s.append(sw, name); legend.append(s); });
+  const svg = document.getElementById("c-mix");
+  svg.innerHTML = "";
+  const rows = MODELS.filter(m => !m.reference);
+  const W = svg.clientWidth, L = labelWidth(svg), R = 8, top = 6;
+  svg.setAttribute("height", top + rows.length * ROW + 4);
+  const span = W - L - R;
+  rows.forEach((m, i) => {
+    const y = top + i * ROW, g = el("g", { class: "row" });
+    g.append(el("rect", { class: "hit", x: 0, y, width: W, height: ROW, rx: 4 }));
+    rowLabel(g, m, L, y + ROW / 2);
+    const total = Object.values(m.mixers).reduce((a, b) => a + b, 0);
+    let x0 = L;
+    MIX.forEach(([key, name, v]) => {
+      const n = m.mixers[key];
+      if (!n) return;
+      const w = n / total * span;
+      g.append(el("rect", { x: x0 + 1, y: y + 4, width: Math.max(1, w - 2), height: ROW - 8, rx: 3, fill: color(v) }));
+      if (w > 34) g.append(el("text", { x: x0 + w / 2, y: y + ROW / 2 + 4, "text-anchor": "middle",
+        style: `fill:${ink(color(v))};font-weight:600;font-size:11.5px` }, n));
+      x0 += w;
+    });
+    g.addEventListener("click", () => openArch(m));
+    const parts = MIX.filter(([k]) => m.mixers[k]).map(([k, name]) => `${m.mixers[k]} ${name}`).join("<br>");
+    g.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(m.name)}</b>${parts}<br><span style="color:var(--muted)">${esc(m.attention)}</span>`));
+    g.addEventListener("mouseleave", hideTip);
+    svg.append(g);
+  });
+}
+
+// 3. vocabulary (bars)
+function drawVocab() {
+  const svg = document.getElementById("c-vocab");
+  svg.innerHTML = "";
+  const rows = [...MODELS].filter(m => m.vocab > 1000).sort((a, b) => b.vocab - a.vocab);
+  const W = svg.clientWidth, L = labelWidth(svg), R = 60, top = 22;
+  svg.setAttribute("height", top + rows.length * ROW + 4);
+  const max = 300000, x = v => L + v / max * (W - L - R);
+  for (let v = 0; v <= max; v += 50000) {
+    svg.append(el("line", { x1: x(v), x2: x(v), y1: top - 4, y2: top + rows.length * ROW, class: "grid" }));
+    svg.append(el("text", { x: x(v), y: top - 8, "text-anchor": "middle", class: "muted" }, v ? v / 1000 + "k" : "0"));
+  }
+  rows.forEach((m, i) => {
+    const y = top + i * ROW, g = el("g", { class: "row" });
+    g.append(el("rect", { class: "hit", x: 0, y, width: W, height: ROW, rx: 4 }));
+    rowLabel(g, m, L, y + ROW / 2);
+    g.append(el("rect", { x: L, y: y + 5, width: Math.max(2, x(m.vocab) - L), height: ROW - 10, rx: 4,
+      fill: color(m.reference ? "--ref" : "--series-1") }));
+    g.append(el("text", { x: x(m.vocab) + 8, y: y + ROW / 2 + 4, class: "muted" }, (m.vocab / 1000).toFixed(0) + "k"));
+    g.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(m.name)}</b>vocabulary ${num(m.vocab)} tokens` +
+      `<br>embedding tables ${params(m.embedding_params / 1e9)} = ${(100 * m.embedding_share).toFixed(m.embedding_share < 0.01 ? 2 : 1)}% of the parameters` +
+      `<br><span style="color:var(--muted)">${m.tied_embeddings ? "input and output embeddings shared" : "separate input and output embeddings"}</span>`));
+    g.addEventListener("mouseleave", hideTip);
+    svg.append(g);
+  });
+}
+
+// --- table --------------------------------------------------------------------------------
+const COLS = [
+  ["Model", "left", m => m.name, m => `<b>${esc(m.name)}</b>${m.reference ? '<span class="tag">reference</span>' : ""}<span class="sub">${esc(m.lab)} · ${m.released}${m.url ? ` · <a href="${m.url}" target="_blank" rel="noopener">model card</a>` : ""}</span>`],
+  ["Total", "", m => m.total, m => params(m.total)],
+  ["Active", "", m => m.active || m.total, m => m.active ? `${params(m.active)}<span class="sub">${(100 * m.active / m.total).toFixed(1)}%</span>` : '<span class="sub">dense</span>'],
+  ["Layers", "", m => m.layers, m => m.layers],
+  ["d_model", "", m => m.d_model, m => num(m.d_model)],
+  ["Heads Q / KV", "", m => m.heads, m => `${m.heads} / ${m.kv_note ? esc(m.kv_note) : m.kv_heads}<span class="sub">head ${m.head_dim}</span>`],
+  ["Experts", "", m => m.experts || 0, m => m.moe ? `${m.experts_active} of ${m.experts}${m.experts_shared ? ` + ${m.experts_shared} shared` : ""}<span class="sub">expert FFN ${num(m.expert_ffn)}</span>` : `<span class="sub">FFN ${num(m.ffn)}</span>`],
+  ["Attention", "wrap", m => m.attention, m => esc(m.attention)],
+  ["Vocabulary", "", m => m.vocab, m => num(m.vocab)],
+  ["Embeddings", "", m => m.embedding_share, m => `${params(m.embedding_params / 1e9)}<span class="sub">${(100 * m.embedding_share).toFixed(m.embedding_share < 0.01 ? 2 : 1)}%${m.tied_embeddings ? " · tied" : ""}</span>`],
+  ["Context", "", m => m.context, m => ctx(m.context)],
+  ["Positions", "left", m => m.rope_theta || 0, m => m.positions === "learned" ? "learned table" : `RoPE θ=${m.rope_theta ? Number(m.rope_theta).toExponential(0).replace("e+", "e") : "?"}${m.rope_partial && m.rope_partial < 1 ? `<span class="sub">on ${Math.round(100 * m.rope_partial)}% of dims</span>` : ""}`],
+  ["Other", "wrap", m => (m.extras || []).join(", "), m => esc((m.extras || []).join(" · ")) + (m.mtp_layers ? "" : "")],
+  ["Params source", "wrap", m => m.params_source, m => `<span class="sub">${esc(m.params_source)}</span>`],
+];
+let sortCol = 1, sortDir = -1;
+function drawTable() {
+  const q = document.getElementById("q").value.toLowerCase(), moeOnly = document.getElementById("moe-only").checked,
+        refs = document.getElementById("refs").checked;
+  const rows = MODELS.filter(m => (refs || !m.reference) && (!moeOnly || m.moe) &&
+    (!q || [m.name, m.lab, m.attention, (m.extras || []).join(" ")].join(" ").toLowerCase().includes(q)));
+  const key = COLS[sortCol][2];
+  rows.sort((a, b) => { const x = key(a), y = key(b); return (x > y ? 1 : x < y ? -1 : 0) * sortDir; });
+  const t = document.getElementById("tbl");
+  t.innerHTML = "";
+  const hr = document.createElement("tr");
+  COLS.forEach(([name, cls], i) => {
+    const th = h("th", cls === "wrap" || cls === "left" ? "left" : "", name + (i === sortCol ? (sortDir > 0 ? " ▲" : " ▼") : ""));
+    th.onclick = () => { sortDir = i === sortCol ? -sortDir : (i === 0 || cls ? 1 : -1); sortCol = i; drawTable(); };
+    hr.append(th);
+  });
+  const thead = document.createElement("thead"); thead.append(hr); t.append(thead);
+  const tb = document.createElement("tbody");
+  rows.forEach(m => {
+    const tr = h("tr", m.reference ? "reference" : "");
+    tr.addEventListener("click", ev => { if (!ev.target.closest("a")) openArch(m); });
+    COLS.forEach(([, cls, , render]) => { const td = h("td", cls); td.innerHTML = render(m); tr.append(td); });
+    tb.append(tr);
+  });
+  t.append(tb);
+}
+["q", "moe-only", "refs"].forEach(id => document.getElementById(id).addEventListener("input", drawTable));
+
+// --- glossary -----------------------------------------------------------------------------
+[["Mixture-of-Experts (MoE)", "The feed-forward block is replaced by many smaller FFNs (experts) and a router that sends each token to a few of them. Total parameters grow, the work per token does not.", "In LLM-Sim: the \"Feed-forward\" steps, one FFN per layer (a dense model)."],
+ ["Shared expert", "An expert that every token goes through, next to the routed ones: it learns what is common to all tokens.", ""],
+ ["GQA (grouped-query attention)", "Several query heads share one key/value head (e.g. 64 query heads, 8 KV heads), so the KV-cache is 8× smaller.", "In LLM-Sim: every head has its own K and V (\"Queries, keys, values\" step)."],
+ ["MLA (multi-head latent attention)", "Keys and values are rebuilt from a small latent vector (e.g. 512 numbers) per token; only the latent goes in the KV-cache.", "In LLM-Sim: the \"KV-cache\" step stores full K and V rows."],
+ ["Sliding window / local attention", "A layer only looks at the last N tokens (128 … 4096). Cheap, and alternated with full-attention layers that keep the long-range view.", "TinyStories: half of its layers are local (window 256)."],
+ ["Linear attention / state-space (DeltaNet, KDA, Mamba)", "Instead of a KV-cache that grows with the text, the layer keeps a fixed-size state updated at every token: cost linear in the length.", ""],
+ ["Sparse attention (DSA, CSA)", "A small \"indexer\" scores the past tokens and the attention runs only on the top-k of them (e.g. 1024 out of 1M).", "In LLM-Sim: the \"Causal mask + softmax\" step weighs all past tokens."],
+ ["RoPE", "Positions are encoded by rotating Q and K by an angle proportional to the position, instead of adding a learned table P. θ sets the slowest rotation; long contexts use a large θ.", "In LLM-Sim: \"Positional encoding: how P is obtained, and why\"."],
+ ["Tied embeddings", "The output matrix W_U is the transpose of the input table W_E, saving vocabulary × d_model parameters.", "In LLM-Sim: W_E and W_U are separate (\"weights\" command)."],
+ ["Multi-token prediction (MTP)", "Extra small layers trained to predict the 2nd, 3rd … next token; used to speed up generation (speculative decoding).", "In LLM-Sim: one token per forward pass (\"Pick the next token\")."],
+ ["Active parameters", "The parameters one token actually uses: attention, shared parts and the chosen experts. They set the compute per token; the total sets the memory.", ""]]
+  .forEach(([t, d, s]) => {
+    const dt = h("dt", null, t), dd = h("dd", null, d);
+    if (s) dd.append(h("span", "sim", s));
+    document.getElementById("glossary").append(dt, dd);
+  });
+
+// --- architecture diagrams ------------------------------------------------------------------
+const MIXER = { F: ["full attention", "--series-1"], L: ["local attention", "--series-2"], N: ["linear attention", "--series-3"],
+                M: ["Mamba-2 (state space)", "--series-3"], S: ["sparse attention", "--series-4"] };
+function wrapText(s, n) {
+  const out = []; let line = "";
+  for (const w of String(s).split(" ")) {
+    if ((line + " " + w).trim().length > n && line) { out.push(line); line = w; } else line = (line + " " + w).trim();
+  }
+  if (line) out.push(line);
+  return out;
+}
+function drawArch(svg, m) {
+  svg.innerHTML = "";
+  const W = 460, cx = W / 2, bw = 300, bx = cx - bw / 2;
+  const box = (y, hgt, lines, opts = {}) => {
+    const x = opts.x ?? bx, w = opts.w ?? bw;
+    svg.append(el("rect", { class: "box", x, y, width: w, height: hgt, rx: 8,
+      style: opts.accent ? `stroke:var(--accent);stroke-width:2` : "" }));
+    lines.forEach((t, i) => svg.append(el("text", { x: x + w / 2, y: y + 19 + i * 16, "text-anchor": "middle",
+      class: i === 0 ? "h" : "s" }, t)));
+    return y + hgt;
+  };
+  const arrow = (y1, y2, x = cx) => svg.append(el("path", { class: "flow", d: `M${x},${y1} V${y2 - 1}`,
+    "marker-end": "url(#arch-arr)" }));
+  const plus = y => { svg.append(el("circle", { cx, cy: y, r: 10, class: "box" }));
+    svg.append(el("text", { x: cx, y: y + 5, "text-anchor": "middle", class: "h" }, "+")); return y + 10; };
+  const defs = el("defs");
+  const mk = el("marker", { id: "arch-arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" });
+  mk.append(el("path", { d: "M0,0 L10,5 L0,10 z", fill: color("--muted") }));
+  defs.append(mk); svg.append(defs);
+
+  let y = 4;
+  svg.append(el("text", { x: 0, y: y + 14, class: "title" }, m.name));
+  svg.append(el("text", { x: 0, y: y + 32, class: "s" }, `${m.lab} · ${params(m.total)} parameters` +
+    (m.active ? ` · ${params(m.active)} active per token` : " · dense")));
+  y += 48;
+  const extras = m.extras || [];
+  const hasExtra = t => extras.find(e => e.toLowerCase().includes(t));
+
+  y = box(y, 44, ["Tokenizer", `vocabulary of ${num(m.vocab)} tokens`]);
+  arrow(y, y + 16); y += 16;
+  const emb = hasExtra("engram") || hasExtra("n-gram");
+  y = box(y, 44, ["Token embedding W_E", `${num(m.vocab)} × ${num(m.d_model)}`], emb ? { x: bx - 40 } : {});
+  if (emb) {
+    svg.append(el("rect", { class: "box", x: bx + bw - 30, y: y - 44, width: 110, height: 44, rx: 8, style: "stroke-dasharray:4 3" }));
+    wrapText(emb.split(":")[0], 16).slice(0, 2).forEach((t, i) =>
+      svg.append(el("text", { x: bx + bw + 25, y: y - 26 + i * 14, "text-anchor": "middle", class: "s" }, t)));
+  }
+  if (m.positions === "learned") {
+    arrow(y, y + 14); y += 14;
+    y = box(y, 40, ["+ position table P", `${num(m.context)} × ${num(m.d_model)}, learned`]);
+  } else {
+    svg.append(el("text", { x: cx + 10, y: y + 18, class: "s" },
+      `positions: RoPE on Q and K${m.rope_theta ? ` (θ = ${Number(m.rope_theta).toExponential(0).replace("e+", "e")})` : ""}`));
+  }
+  arrow(y, y + 26); y += 26;
+
+  // the stack of layers
+  const top = y, inner = bx - 30, iw = bw + 60;
+  y += 14;
+  svg.append(el("text", { x: inner + 12, y: y + 8, class: "h" }, `${m.layers} layers`));
+  y += 20;
+  const L = m.layers, sx = inner + 70, sw = iw - 84, cw = sw / L;
+  [["mixer", m.mix_seq], ["FFN", m.ffn_seq]].forEach(([label, seq], r) => {
+    svg.append(el("text", { x: inner + 12, y: y + 12 + r * 20, class: "s" }, label));
+    [...seq].forEach((c, i) => {
+      const fill = r === 0 ? (MIXER[c] ? color(MIXER[c][1]) : "none") :
+                   c === "E" ? color("--accent") : c === "D" ? color("--connector") : "none";
+      const rect = el("rect", { class: "cell", x: sx + i * cw + (cw > 3 ? 0.5 : 0), y: y + r * 20, width: Math.max(1, cw - (cw > 3 ? 1 : 0)),
+        height: 15, rx: cw > 6 ? 2 : 0, fill, stroke: fill === "none" ? color("--border") : "none" });
+      rect.addEventListener("mousemove", ev => showTip(ev, `<b>layer ${i + 1}</b>` +
+        `${MIXER[m.mix_seq[i]] ? MIXER[m.mix_seq[i]][0] : "no token mixing"}<br>` +
+        `${m.ffn_seq[i] === "E" ? "mixture of experts" : m.ffn_seq[i] === "D" ? "dense feed-forward" : "no feed-forward"}`));
+      rect.addEventListener("mouseleave", hideTip);
+      svg.append(rect);
+    });
+  });
+  y += 56;
+  // legend of the strips
+  let lx = sx;
+  const legend = [...new Set(m.mix_seq)].filter(c => MIXER[c]).map(c => [MIXER[c][0], color(MIXER[c][1])])
+    .concat(m.ffn_seq.includes("E") ? [["MoE FFN", color("--accent")]] : [])
+    .concat(m.ffn_seq.includes("D") ? [["dense FFN", color("--connector")]] : []);
+  legend.forEach(([name, c]) => {
+    const w = name.length * 6.1 + 22;
+    if (lx + w > inner + iw) { lx = sx; y += 16; }
+    svg.append(el("rect", { x: lx, y: y - 9, width: 10, height: 10, rx: 2, fill: c }));
+    svg.append(el("text", { x: lx + 14, y, class: "s" }, name));
+    lx += w;
+  });
+  y += 18;
+
+  // one block, as a schematic
+  const norm = m.norm || "Norm";
+  y = box(y, 34, [norm]);
+  arrow(y, y + 14); y += 14;
+  const kinds = [...new Set(m.mix_seq)].filter(c => MIXER[c]).map(c => MIXER[c][0]);
+  const kv = m.kv_note ? m.kv_note : m.kv_heads === m.heads ? `${m.heads} heads` : `${m.heads} query heads, ${m.kv_heads} KV heads (GQA)`;
+  const attnLines = [kinds.length > 1 ? "Token mixing: " + kinds.length + " kinds" : kinds[0][0].toUpperCase() + kinds[0].slice(1)];
+  if (kinds.length > 1) attnLines.push(kinds.join(" · "));
+  attnLines.push(`${kv}, head ${m.head_dim}`);
+  y = box(y, 18 + attnLines.length * 16, attnLines);
+  arrow(y, y + 12); y = plus(y + 22);
+  arrow(y, y + 14); y += 14;
+  y = box(y, 34, [norm]);
+  arrow(y, y + 14); y += 14;
+  if (m.moe) {
+    const N = m.experts, k = m.experts_active, sh = m.experts_shared || 0;
+    const cols = N <= 32 ? N : N <= 256 ? 32 : 64, rows = Math.ceil(N / cols);
+    const cs = Math.min(9, (bw - 24) / cols), gw = cols * cs, gh = rows * cs;
+    const hgt = 78 + gh + (sh ? 20 : 0);
+    svg.append(el("rect", { class: "box", x: bx, y, width: bw, height: hgt, rx: 8 }));
+    svg.append(el("text", { x: cx, y: y + 19, "text-anchor": "middle", class: "h" },
+      `Mixture of experts: ${k} of ${num(N)}${sh ? ` + ${sh} shared` : ""}`));
+    svg.append(el("text", { x: cx, y: y + 35, "text-anchor": "middle", class: "s" }, `a router picks ${k} per token`));
+    svg.append(el("text", { x: cx, y: y + 51, "text-anchor": "middle", class: "s" },
+      `expert FFN ${num(m.expert_ffn)}${m.ffn_kind ? " · " + m.ffn_kind : ""}`));
+    const gx = cx - gw / 2, gy = y + 62;
+    for (let i = 0; i < N; i++) {
+      const on = i < k;
+      svg.append(el("rect", { x: gx + (i % cols) * cs, y: gy + Math.floor(i / cols) * cs, width: Math.max(1, cs - 1),
+        height: Math.max(1, cs - 1), fill: on ? color("--accent") : color("--grid") }));
+    }
+    if (sh) {
+      for (let i = 0; i < sh; i++)
+        svg.append(el("rect", { x: gx + i * (cs + 2), y: gy + gh + 6, width: cs - 1 + 2, height: cs - 1 + 2, fill: color("--text") }));
+      svg.append(el("text", { x: gx + sh * (cs + 2) + 6, y: gy + gh + 6 + cs, class: "s" }, "shared: used by every token"));
+    }
+    y += hgt;
+  } else {
+    y = box(y, 44, ["Feed-forward (per token)", `${num(m.d_model)} → ${num(m.ffn)} → ${num(m.d_model)}${m.ffn_kind ? " · " + m.ffn_kind : ""}`]);
+  }
+  arrow(y, y + 12); y = plus(y + 22);
+  if (m.mix_seq.includes("-"))
+    { y += 16; svg.append(el("text", { x: cx, y, "text-anchor": "middle", class: "s" }, "here a layer is either a mixer or an FFN: see the strips")); }
+  y += 12;
+  svg.append(el("rect", { class: "block", x: inner, y: top, width: iw, height: y - top, rx: 12 }));
+  arrow(y, y + 18); y += 18;
+
+  // output
+  y = box(y, 34, ["Final " + norm]);
+  arrow(y, y + 14); y += 14;
+  y = box(y, 44, ["Unembedding W_U → logits", `${num(m.d_model)} × ${num(m.vocab)}${m.tied_embeddings ? ", tied to W_E" : ""}`]);
+  if (m.mtp_layers) {
+    svg.append(el("rect", { class: "box", x: bx + bw + 8, y: y - 44, width: W - bx - bw - 8, height: 44, rx: 8, style: "stroke-dasharray:4 3" }));
+    svg.append(el("text", { x: (bx + bw + 8 + W) / 2, y: y - 26, "text-anchor": "middle", class: "s" }, `+ ${m.mtp_layers} MTP`));
+    svg.append(el("text", { x: (bx + bw + 8 + W) / 2, y: y - 12, "text-anchor": "middle", class: "s" }, "layer" + (m.mtp_layers > 1 ? "s" : "")));
+  }
+  arrow(y, y + 14); y += 14;
+  y = box(y, 34, ["Softmax → sampling → next token"]);
+  y += 12;
+  // what else
+  const other = extras.filter(e => !/engram|n-gram/i.test(e));
+  if (other.length) {
+    svg.append(el("text", { x: 0, y: y + 12, class: "h" }, "Also"));
+    y += 16;
+    other.forEach(e => wrapText("· " + e, 64).forEach(t => { y += 15; svg.append(el("text", { x: 0, y, class: "s" }, t)); }));
+    y += 6;
+  }
+  svg.setAttribute("viewBox", `0 0 ${W} ${y + 4}`);
+  svg.removeAttribute("height");
+  svg.style.aspectRatio = `${W} / ${y + 4}`;
+}
+const selA = document.getElementById("arch-a"), selB = document.getElementById("arch-b");
+MODELS.forEach((m, i) => { selA.append(new Option(m.name, i)); selB.append(new Option(m.name, i)); });
+selA.value = MODELS.findIndex(m => m.name.startsWith("Kimi"));
+selB.value = MODELS.findIndex(m => m.name.startsWith("LLM-Sim"));
+function drawArchs() { drawArch(document.getElementById("arch-svg-a"), MODELS[selA.value]);
+  drawArch(document.getElementById("arch-svg-b"), MODELS[selB.value]); }
+selA.addEventListener("change", drawArchs);
+selB.addEventListener("change", drawArchs);
+function openArch(m) {
+  selA.value = MODELS.indexOf(m);
+  drawArchs();
+  hideTip();
+  document.getElementById("architecture").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+
+function drawAll() { drawParams(); drawMix(); drawVocab(); drawArchs(); }
+drawAll();
+drawTable();
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+  drawAll();
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+</script>
+</body>
+</html>

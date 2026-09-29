@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-Sim results</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --border: #e2e2e0;
+  --accent: #6a3fd1; --accent-soft: #efe9fb; --code-bg: #f1f0ee;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151517; --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #34343a;
+    --accent: #b49bff; --accent-soft: #2c2640; --code-bg: #28282c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151517; --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #34343a;
+  --accent: #b49bff; --accent-soft: #2c2640; --code-bg: #28282c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: center; gap: 14px; padding: 14px 24px; background: var(--panel); border-bottom: 1px solid var(--border); }
+header h1 { font-size: 18px; margin: 0; }
+header .spacer { flex: 1; }
+button { font: inherit; font-size: 13px; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+main { max-width: 1240px; margin: 0 auto; padding: 22px 24px 60px; display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
+.lead { margin-top: 0; max-width: 760px; }
+.note { color: var(--muted); font-size: 13px; }
+h2 { font-size: 18px; margin: 28px 0 10px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.models { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.model h3 { margin: 0 0 2px; font-size: 16px; }
+.model .file { color: var(--muted); font-size: 12.5px; font-family: ui-monospace, Consolas, monospace; }
+.model p { margin: 8px 0; font-size: 14px; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; margin: 10px 0; font-variant-numeric: tabular-nums; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.links a { font-size: 13.5px; text-decoration: none; color: var(--accent); border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px; background: var(--bg); }
+.links a:hover { border-color: var(--accent); }
+.feature { display: flex; gap: 16px; align-items: center; text-decoration: none; color: var(--text); }
+.feature:hover { border-color: var(--accent); }
+.feature .big { font-size: 30px; }
+.feature b { display: block; font-size: 16px; }
+aside { position: sticky; top: 16px; }
+aside svg { width: 100%; height: auto; display: block; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+ul.howto { padding-left: 18px; margin: 6px 0; font-size: 14px; }
+@media (max-width: 980px) {
+  main { grid-template-columns: 1fr; padding: 16px; }
+  aside { position: static; max-width: 440px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>LLM-Sim results</h1>
+  <span class="spacer"></span>
+  <button id="theme" title="toggle theme">◐</button>
+</header>
+<main>
+  <div>
+    <p class="lead">What a small GPT-style language model computes, with the real numbers: every page below is a
+    step-by-step trace produced by the simulator. Use ← / → to move between steps, hover a number for its exact value;
+    the block diagram next to each trace highlights where you are.</p>
+    <p class="note" id="meta"></p>
+
+    <a class="card feature" href="compare.html">
+      <span class="big">⚖</span>
+      <span><b>Open-weight LLMs compared</b>
+      <span class="note">The latest models of the main labs side by side: parameters (total and active), experts,
+      attention type, vocabulary, embeddings, context. How far they are from the models below.</span></span>
+    </a>
+
+    <h2>Models in this simulator</h2>
+    <div class="models" id="models"></div>
+
+    <h2>What each page shows</h2>
+    <div class="card">
+      <ul class="howto">
+        <li><b>Prediction, step by step</b>: tokenizer → embeddings → every layer (LayerNorm, Q/K/V, each attention head,
+        feed-forward, residuals) → logits → sampling, for the first tokens generated after the prompt; from the second
+        token on, the KV-cache is used.</li>
+        <li><b>Training step</b>: loss, backpropagation layer by layer, gradients, clipping and the AdamW update, repeated
+        on the same sequence.</li>
+        <li><b>Weights</b>: every learned matrix (W_E, W_Q, W_K, W_V, W_O, the FFN, W_U…) with what it does.</li>
+      </ul>
+      <p class="note">Regenerate this site with <code>python main.py site</code>; the terminal version of every page is
+      <code>python main.py step</code>, <code>train-step</code>, <code>weights</code> (or <code>cpp/build/llmsim …</code>).</p>
+    </div>
+  </div>
+  <aside class="card" aria-label="block diagram"><svg xmlns="http://www.w3.org/2000/svg" class="llmsim-diagram" viewBox="0 0 480 1010" width="480" height="1010" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Block diagram of the transformer simulated by LLM-Sim">
+  <style>
+    .llmsim-diagram.standalone { --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --border: #c9c9c6; --accent: #6a3fd1; --accent-soft: #efe9fb; --bg: #f7f7f5; }
+    @media (prefers-color-scheme: dark) {
+      .llmsim-diagram.standalone { --panel: #1f1f22; --text: #ececef; --muted: #9a9aa2; --border: #4a4a52; --accent: #b49bff; --accent-soft: #2c2640; --bg: #151517; }
+    }
+    .llmsim-diagram .bgfill { fill: var(--bg); }
+    .llmsim-diagram .node rect, .llmsim-diagram .node circle { fill: var(--panel); stroke: var(--border); stroke-width: 1.3; }
+    .llmsim-diagram .node text { fill: var(--text); font-size: 13px; text-anchor: middle; }
+    .llmsim-diagram .node .sub { fill: var(--muted); font-size: 11px; }
+    .llmsim-diagram .node.on rect, .llmsim-diagram .node.on circle { stroke: var(--accent); stroke-width: 2.6; fill: var(--accent-soft); }
+    .llmsim-diagram .node.on text { font-weight: 600; }
+    .llmsim-diagram .node.clickable { cursor: pointer; }
+    .llmsim-diagram .node.clickable:hover rect, .llmsim-diagram .node.clickable:hover circle { stroke: var(--accent); }
+    .llmsim-diagram .flow { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+    .llmsim-diagram .residual { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 5 3; }
+    .llmsim-diagram .loop { stroke: var(--accent); stroke-width: 1.4; fill: none; stroke-dasharray: 2 3; }
+    .llmsim-diagram .node rect.container { fill: none; stroke: var(--border); stroke-width: 1.3; stroke-dasharray: 6 4; }
+    .llmsim-diagram .node.on rect.container { fill: none; stroke: var(--accent); stroke-width: 2.6; }
+    .llmsim-diagram .label { fill: var(--muted); font-size: 11.5px; }
+    .llmsim-diagram .title { fill: var(--text); font-size: 12.5px; font-weight: 600; }
+    .llmsim-diagram .badge { fill: var(--accent); font-size: 12px; font-weight: 600; }
+    .llmsim-diagram .arrowhead { fill: var(--muted); }
+    .llmsim-diagram .arrowhead-accent { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="llmsim-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+    <marker id="llmsim-arr-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="arrowhead-accent" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+  <rect class="bgfill" x="0" y="0" width="480" height="1010"/>
+
+  <!-- input side -->
+  <g class="node" id="n-tokenizer"><rect x="110" y="16" width="220" height="44" rx="8"/>
+    <text x="220" y="35">Tokenizer</text><text class="sub" x="220" y="51">text → token ids</text></g>
+  <path class="flow" d="M220,60 V78 H160 V92" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M220,78 H300 V92" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-tok-emb"><rect x="95" y="94" width="130" height="48" rx="8"/>
+    <text x="160" y="114">Token embedding</text><text class="sub" x="160" y="131" data-fmt="W_E ({V}×{C})">W_E (V×d)</text></g>
+  <g class="node" id="n-pos-emb"><rect x="235" y="94" width="130" height="48" rx="8"/>
+    <text x="300" y="114">Position</text><text class="sub" x="300" y="131" data-fmt="P ({T}×{C})">P (T×d)</text></g>
+  <path class="flow" d="M160,142 V160 H209" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M300,142 V160 H231" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add0"><circle cx="220" cy="160" r="11"/><text x="220" y="165">+</text></g>
+  <path class="flow" d="M220,171 V214" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="232" y="192">x₀: the residual stream</text>
+
+  <!-- transformer block -->
+  <g class="node" id="n-block"><rect class="container" x="30" y="200" width="420" height="500" rx="12"/></g>
+  <text class="title" x="44" y="220" data-fmt="Transformer block × {L}">Transformer block × N</text>
+  <text class="badge" id="llmsim-layer-badge" x="436" y="220" text-anchor="end"></text>
+
+  <!-- attention half -->
+  <path class="residual" d="M220,228 H60 V488 H209" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="50" y="360" transform="rotate(-90 50 360)" text-anchor="middle">residual</text>
+  <text class="label" x="50" y="590" transform="rotate(-90 50 590)" text-anchor="middle">residual</text>
+  <g class="node" id="n-ln1"><rect x="110" y="232" width="220" height="34" rx="8"/>
+    <text x="220" y="254">LayerNorm 1</text></g>
+  <path class="flow" d="M220,266 V280" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-qkv"><rect x="110" y="282" width="220" height="44" rx="8"/>
+    <text x="220" y="301">Q, K, V projections</text><text class="sub" x="220" y="317" data-fmt="x·W_Q, x·W_K, x·W_V  ({C}×{C})">x·W_Q, x·W_K, x·W_V</text></g>
+  <g class="node" id="n-kv"><rect x="346" y="296" width="92" height="44" rx="8"/>
+    <text x="392" y="315">KV-cache</text><text class="sub" x="392" y="331">K, V of past</text></g>
+  <path class="flow" d="M330,311 H344" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M392,340 V372 H332" marker-end="url(#llmsim-arr)"/>
+  <path class="flow" d="M220,326 V340" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-attn"><rect x="110" y="342" width="220" height="66" rx="8"/>
+    <text x="220" y="362">Multi-head attention</text>
+    <text class="sub" x="220" y="379">softmax(mask(Q·Kᵀ/√d_h))·V</text>
+    <text class="sub" x="220" y="396" data-fmt="{H} heads × d_h {D}">H heads × d_h</text></g>
+  <text class="badge" id="llmsim-head-badge" x="392" y="400" text-anchor="middle"></text>
+  <path class="flow" d="M220,408 V424" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-concat"><rect x="110" y="426" width="220" height="44" rx="8"/>
+    <text x="220" y="445">Concat heads · W_O</text><text class="sub" x="220" y="461" data-fmt="({C}×{C})">mix the heads</text></g>
+  <path class="flow" d="M220,470 V477" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add1"><circle cx="220" cy="488" r="11"/><text x="220" y="493">+</text></g>
+  <path class="flow" d="M220,499 V520" marker-end="url(#llmsim-arr)"/>
+
+  <!-- feed-forward half -->
+  <path class="residual" d="M220,510 H60 V670 H209" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-ln2"><rect x="110" y="522" width="220" height="34" rx="8"/>
+    <text x="220" y="544">LayerNorm 2</text></g>
+  <path class="flow" d="M220,556 V572" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-ffn"><rect x="110" y="574" width="220" height="66" rx="8"/>
+    <text x="220" y="594">Feed-forward (per token)</text>
+    <text class="sub" x="220" y="611">W₁ → GELU → W₂</text>
+    <text class="sub" x="220" y="628" data-fmt="{C} → {F} → {C}">d → d_ff → d</text></g>
+  <path class="flow" d="M220,640 V659" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-add2"><circle cx="220" cy="670" r="11"/><text x="220" y="675">+</text></g>
+  <path class="flow" d="M220,681 V726" marker-end="url(#llmsim-arr)"/>
+  <text class="label" x="232" y="712">to the next block</text>
+
+  <!-- output side -->
+  <g class="node" id="n-lnf"><rect x="110" y="728" width="220" height="34" rx="8"/>
+    <text x="220" y="750">Final LayerNorm</text></g>
+  <path class="flow" d="M220,762 V776" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-head"><rect x="110" y="778" width="220" height="44" rx="8"/>
+    <text x="220" y="797">Unembedding W_U</text><text class="sub" x="220" y="813" data-fmt="logits: {V} scores per position">logits: one score per token</text></g>
+  <path class="flow" d="M220,822 V836" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-softmax"><rect x="110" y="838" width="220" height="44" rx="8"/>
+    <text x="220" y="857">Softmax</text><text class="sub" x="220" y="873">probabilities of the next token</text></g>
+  <path class="flow" d="M220,882 V896" marker-end="url(#llmsim-arr)"/>
+  <g class="node" id="n-sample"><rect x="110" y="898" width="220" height="44" rx="8"/>
+    <text x="220" y="917">Sampling</text><text class="sub" x="220" y="933">temperature · top-k · top-p</text></g>
+  <path class="flow" d="M220,942 V960" marker-end="url(#llmsim-arr)"/>
+  <text class="title" x="220" y="978" text-anchor="middle">next token</text>
+
+  <!-- autoregressive loop -->
+  <path class="loop" d="M262,974 H462 V38 H332" marker-end="url(#llmsim-arr-accent)"/>
+  <text class="label" x="470" y="520" transform="rotate(90 470 520)" text-anchor="middle">appended to the text: repeat for the next token</text>
+</svg>
+</aside>
+</main>
+<script type="application/json" id="data">{"generated": "2026-09-29", "models": [{"slug": "tiny", "name": "tiny", "file": "weights/tiny.npz", "config": {"vocab_size": 65, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "char", "params": 9184, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare, one token per character: every number fits on screen."}, {"slug": "tiny-bpe", "name": "tiny-bpe", "file": "weights/tiny-bpe.npz", "config": {"vocab_size": 256, "d_model": 16, "n_heads": 2, "n_layers": 2, "d_ff": 64, "block_size": 32, "pos_encoding": "learned"}, "tokenizer": "bpe", "params": 15296, "prompt": "ROMEO:", "description": "Trained in this project on tiny Shakespeare with a small BPE tokenizer (256 tokens)."}, {"slug": "tinystories-1m", "name": "TinyStories-1M", "file": "weights/tinystories-1m.npz", "config": {"vocab_size": 50257, "d_model": 64, "n_heads": 16, "n_layers": 8, "d_ff": 256, "block_size": 256, "pos_encoding": "learned"}, "tokenizer": "byte-bpe", "params": 6849280, "prompt": "Once upon a time there was a little girl named Lily. She", "description": "A real pretrained model converted exactly from Hugging Face, with GPT-2's tokenizer."}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById("data").textContent);
+function h(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function params(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  return (n / 1e3).toFixed(1) + "K";
+}
+document.getElementById("meta").textContent = `Generated on ${DATA.generated}.`;
+for (const m of DATA.models) {
+  const c = h("div", "card model");
+  c.append(h("h3", null, m.name), h("div", "file", m.file));
+  if (m.description) c.append(h("p", null, m.description));
+  const dl = h("dl", "facts");
+  const c_ = m.config;
+  [["parameters", params(m.params)], ["tokenizer", `${m.tokenizer}, ${c_.vocab_size.toLocaleString("en-US")} tokens`],
+   ["layers × heads", `${c_.n_layers} × ${c_.n_heads}`], ["d_model / d_ff", `${c_.d_model} / ${c_.d_ff}`],
+   ["context", `${c_.block_size} tokens`], ["prompt", `“${m.prompt}”`]]
+    .forEach(([k, v]) => dl.append(h("dt", null, k), h("dd", null, v)));
+  c.append(dl);
+  const links = h("div", "links");
+  [["trace.html", "Prediction, step by step"], ["train.html", "Training step"], ["weights.html", "Weights"]]
+    .forEach(([f, label]) => { const a = h("a", null, label); a.href = `${m.slug}/${f}`; links.append(a); });
+  c.append(links);
+  document.getElementById("models").append(c);
+}
+// the diagram shows the sizes of the first model
+const svg = document.querySelector("aside svg"), c0 = DATA.models[0] && DATA.models[0].config;
+if (svg && c0) {
+  const v = { V: c0.vocab_size, C: c0.d_model, T: c0.block_size, H: c0.n_heads, D: c0.d_model / c0.n_heads, L: c0.n_layers, F: c0.d_ff };
+  svg.querySelectorAll("[data-fmt]").forEach(t => { t.textContent = t.dataset.fmt.replace(/\{(\w)\}/g, (_, k) => v[k] ?? k); });
+}
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+};
+</script>
+</body>
+</html>
