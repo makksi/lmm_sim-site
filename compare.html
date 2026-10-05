@@ -85,6 +85,8 @@ svg.arch .cell { cursor: default; }
 tbody tr { cursor: pointer; }
 dl.glossary { display: grid; grid-template-columns: 200px 1fr; gap: 10px 18px; margin: 0; }
 dl.glossary dt { font-weight: 600; }
+dl.glossary dt a { color: inherit; text-decoration: none; }
+dl.glossary dt a:hover { color: var(--accent); }
 dl.glossary dd { margin: 0; }
 dl.glossary dd .sim { color: var(--muted); font-size: 13px; display: block; }
 @media (max-width: 720px) {
@@ -99,6 +101,7 @@ dl.glossary dd .sim { color: var(--muted); font-size: 13px; display: block; }
 <header>
   <h1>Open-weight LLMs</h1>
   <a id="back" href="index.html">← simulator results</a>
+  <a id="glossary-link" href="glossary.html">glossary</a>
   <span class="spacer"></span>
   <button id="theme" title="toggle theme">◐</button>
 </header>
@@ -174,6 +177,600 @@ dl.glossary dd .sim { color: var(--muted); font-size: 13px; display: block; }
 </main>
 <div id="tip"></div>
 <script type="application/json" id="data">{"fetched": "2026-09-26", "source": "Hugging Face config.json and model cards", "models": [{"id": "deepseek-ai/DeepSeek-V4.1-Flash", "name": "DeepSeek-V4.1-Flash", "lab": "DeepSeek", "total": 552, "active": 16, "params_source": "model card: 552B backbone; 8B active in prefill, 16B in decode", "attention": "Compressed sparse attention (CSA2: indexer top-512, KV shared across layers) + sliding window 128; 1 KV head of 512", "extras": ["causal encoder-decoder (20 + 20 layers)", "Engram conditional memory: +196B parameters looked up by token", "3 multi-token-prediction layers", "FP4 experts", "vision input"], "layers": 40, "d_model": 5120, "heads": 64, "kv_heads": 1, "head_dim": 512, "ffn": 20480, "expert_ffn": 2304, "experts": 384, "experts_active": 6, "experts_shared": 1, "vocab": 129280, "context": 1048576, "rope_theta": 10000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": null, "multimodal": true, "model_type": "deepseek_v41_text", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 40}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-09-10", "license": "mit", "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash", "config_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash", "embedding_params": 1323827200, "embedding_share": 0.00239823768115942, "moe": true, "active_share": 0.028985507246376812}, {"id": "deepseek-ai/DeepSeek-V4-Pro-0813", "name": "DeepSeek-V4-Pro (0813)", "lab": "DeepSeek", "total": 1600, "active": 49, "params_source": "DeepSeek-V4-Pro model card (same architecture): 1.6T / 49B", "attention": "Compressed sparse attention (KV compressed 4× or 128×, alternating) + indexer top-1024 + sliding window 128; 1 KV head of 512", "extras": ["low-rank query/output projections", "3 hash-routed layers", "1 multi-token-prediction layer", "FP4 experts"], "layers": 61, "d_model": 7168, "heads": 128, "kv_heads": 1, "head_dim": 512, "ffn": 28672, "expert_ffn": 3072, "experts": 384, "experts_active": 6, "experts_shared": 1, "vocab": 129280, "context": 1048576, "rope_theta": 10000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "deepseek_v4", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 61}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-13", "license": "mit", "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813", "config_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813", "embedding_params": 1853358080, "embedding_share": 0.0011583488, "moe": true, "active_share": 0.030625}, {"id": "Qwen/Qwen3.8-2.4T-A95B", "name": "Qwen3.8-2.4T-A95B", "lab": "Qwen (Alibaba)", "total": 2400, "active": 95, "params_source": "model card: 2.4T total, 95B activated", "attention": "Hybrid: 3 linear-attention layers (DeltaNet-style) for every full-attention layer (GQA 64/4, gated output)", "extras": ["1 multi-token-prediction layer", "RoPE on 25% of the head dims"], "layers": 92, "d_model": 8192, "heads": 64, "kv_heads": 4, "head_dim": 256, "ffn": 32768, "expert_ffn": 2048, "experts": 512, "experts_active": 10, "experts_shared": 1, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 69, "full_attention": 23}, "multimodal": false, "model_type": "qwen3_5_moe_text", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 23, "linear": 69}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-08", "license": "other", "url": "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B", "config_url": "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B", "embedding_params": 4068474880, "embedding_share": 0.0016951978666666667, "moe": true, "active_share": 0.03958333333333333}, {"id": "Qwen/Qwen3.8-Flash-Next", "name": "Qwen3.8-Flash-Next", "lab": "Qwen (Alibaba)", "total": 125, "active": 6, "params_source": "model card: 125B with 6B activated, plus 51B n-gram embedding and 4B MTP", "attention": "Hybrid 3 linear : 1 full (GQA 24/2), full layers with a sparse indexer (budget 2048 tokens)", "extras": ["n-gram embeddings: +51B parameters", "per-layer embeddings", "vision input"], "layers": 48, "d_model": 2560, "heads": 24, "kv_heads": 2, "head_dim": 256, "ffn": 10240, "expert_ffn": 640, "experts": 512, "experts_active": 10, "experts_shared": 1, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 36, "full_attention": 12}, "multimodal": true, "model_type": "qwen4_exp_text", "mix_seq": "NNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNSNNNS", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"linear": 36, "sparse": 12}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-24", "license": "other", "url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next", "config_url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next", "embedding_params": 1271398400, "embedding_share": 0.0101711872, "moe": true, "active_share": 0.048}, {"id": "Qwen/Qwen3.8-27B", "name": "Qwen3.8-27B", "lab": "Qwen (Alibaba)", "total": 27, "active": null, "params_source": "model name (27.8B stored, vision encoder included)", "attention": "Hybrid 3 linear : 1 full (GQA 24/4, gated output)", "extras": ["vision input", "1 MTP layer"], "layers": 64, "d_model": 5120, "heads": 24, "kv_heads": 4, "head_dim": 256, "ffn": 17408, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 248320, "context": 262144, "rope_theta": 10000000, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": {"linear_attention": 48, "full_attention": 16}, "multimodal": true, "model_type": "qwen3_5_text", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 16, "linear": 48}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-05", "license": "apache-2.0", "url": "https://huggingface.co/Qwen/Qwen3.8-27B", "config_url": "https://huggingface.co/Qwen/Qwen3.8-27B", "embedding_params": 2542796800, "embedding_share": 0.09417765925925926, "moe": false, "active_share": null}, {"id": "moonshotai/Kimi-K3", "name": "Kimi K3", "lab": "Moonshot AI", "total": 2800, "active": 104, "params_source": "model card: 2.8T total, 104B activated", "attention": "Hybrid: 69 Kimi Delta Attention (linear) + 24 gated MLA layers", "kv_note": "MLA latent 512", "extras": ["latent MoE (experts work in a 3584-dim space)", "SiTU activation", "vision input"], "layers": 93, "d_model": 7168, "heads": 96, "kv_heads": 96, "head_dim": 192, "ffn": 33792, "expert_ffn": 3072, "experts": 896, "experts_active": 16, "experts_shared": 2, "vocab": 163840, "context": 1048576, "rope_theta": null, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "situ", "mtp_layers": 0, "layer_mix": {"linear_attention": 69, "full_attention": 24}, "multimodal": true, "model_type": "kimi_linear", "mix_seq": "NNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFNNNFF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 24, "linear": 69}, "norm": "RMSNorm", "ffn_kind": "SiTU", "released": "2026-06-13", "license": "other", "url": "https://huggingface.co/moonshotai/Kimi-K3", "config_url": "https://huggingface.co/moonshotai/Kimi-K3", "embedding_params": 2348810240, "embedding_share": 0.0008388608, "moe": true, "active_share": 0.037142857142857144}, {"id": "zai-org/GLM-5.3", "name": "GLM-5.3", "lab": "Z.ai", "total": 744, "active": 40, "params_source": "GLM-5 model card (same configuration): 744B / 40B", "attention": "MLA (KV latent 512) + DeepSeek Sparse Attention (indexer top-2048)", "kv_note": "MLA latent 512", "extras": ["first 3 layers dense", "1 MTP layer", "FP8 weights"], "layers": 78, "d_model": 6144, "heads": 64, "kv_heads": 64, "head_dim": 192, "ffn": 12288, "expert_ffn": 2048, "experts": 256, "experts_active": 8, "experts_shared": 1, "vocab": 154880, "context": 1048576, "rope_theta": 8000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "glm_moe_dsa", "mix_seq": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"sparse": 78}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-25", "license": "other", "url": "https://huggingface.co/zai-org/GLM-5.3", "config_url": "https://huggingface.co/zai-org/GLM-5.3", "embedding_params": 1903165440, "embedding_share": 0.002558018064516129, "moe": true, "active_share": 0.053763440860215055}, {"id": "MiniMaxAI/MiniMax-M2.7", "name": "MiniMax-M2.7", "lab": "MiniMax", "total": 230, "active": 10, "params_source": "MiniMax-M2 model card (same configuration): 230B / 10B", "attention": "Full attention in every layer, GQA 48/8, QK-norm", "extras": ["3 multi-token-prediction modules", "partial RoPE (64 of 128 dims)", "FP8 weights"], "layers": 62, "d_model": 3072, "heads": 48, "kv_heads": 8, "head_dim": 128, "ffn": 1536, "expert_ffn": null, "experts": 256, "experts_active": 8, "experts_shared": 0, "vocab": 200064, "context": 204800, "rope_theta": 5000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": null, "multimodal": false, "model_type": "minimax_m2", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 62}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-04-09", "license": "other", "url": "https://huggingface.co/MiniMaxAI/MiniMax-M2.7", "config_url": "https://huggingface.co/MiniMaxAI/MiniMax-M2.7", "embedding_params": 1229193216, "embedding_share": 0.005344318330434783, "moe": true, "active_share": 0.043478260869565216}, {"id": "XiaomiMiMo/MiMo-V2.6-Pro-RL", "name": "MiMo-V2.6-Pro", "lab": "Xiaomi", "total": 1020, "active": 42, "params_source": "model card: 1.02T total / 42B activated", "attention": "Hybrid: sliding window 128 and full attention (GQA 128/8), attention sinks", "extras": ["3 MTP layers", "audio + vision input", "context 1M"], "layers": 70, "d_model": 6144, "heads": 128, "kv_heads": 8, "head_dim": 192, "ffn": 16384, "expert_ffn": 2048, "experts": 384, "experts_active": 8, "experts_shared": 0, "vocab": 152576, "context": 1048576, "rope_theta": 10000000, "rope_partial": 0.334, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"full_attention": 10, "sliding_attention": 60}, "multimodal": true, "model_type": "mimo_v2", "mix_seq": "FLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLLFLLLLLLFLLLLLLF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 10, "local": 60}, "norm": null, "ffn_kind": "SwiGLU", "released": "2026-09-21", "license": "mit", "url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL", "config_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL", "embedding_params": 1874853888, "embedding_share": 0.0018380920470588236, "moe": true, "active_share": 0.041176470588235294}, {"id": "XiaomiMiMo/MiMo-V2.6-Flash-RL", "name": "MiMo-V2.6-Flash", "lab": "Xiaomi", "total": 309, "active": 15, "params_source": "model card: 309B total / 15B activated", "attention": "Hybrid: sliding window 128 and full attention (GQA 64/4), attention sinks", "extras": ["3 MTP layers", "audio + vision input", "context 1M"], "layers": 48, "d_model": 4096, "heads": 64, "kv_heads": 4, "head_dim": 192, "ffn": 16384, "expert_ffn": 2048, "experts": 256, "experts_active": 8, "experts_shared": 0, "vocab": 152576, "context": 1048576, "rope_theta": 10000000.0, "rope_partial": 0.334, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 3, "layer_mix": {"full_attention": 9, "sliding_attention": 39}, "multimodal": true, "model_type": "mimo_v2", "mix_seq": "FLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 9, "local": 39}, "norm": null, "ffn_kind": "SwiGLU", "released": "2026-09-21", "license": "mit", "url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL", "config_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL", "embedding_params": 1249902592, "embedding_share": 0.004044992207119741, "moe": true, "active_share": 0.04854368932038835}, {"id": "google/gemma-4-31B-it", "name": "Gemma 4 31B", "lab": "Google", "total": 30.7, "active": null, "params_source": "model card: 30.7B", "attention": "5 sliding-window (1024) layers per full-attention layer; GQA 32/16 (global layers 4 KV heads of 512)", "extras": ["tied embeddings", "vision input"], "layers": 60, "d_model": 5376, "heads": 32, "kv_heads": 16, "head_dim": 256, "ffn": 21504, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 262144, "context": 262144, "rope_theta": 1000000.0, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": true, "activation": "gelu_pytorch_tanh", "mtp_layers": null, "layer_mix": {"sliding_attention": 50, "full_attention": 10}, "multimodal": true, "model_type": "gemma4_text", "mix_seq": "LLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 10, "local": 50}, "norm": "RMSNorm", "ffn_kind": "GeGLU (tanh)", "released": "2026-03-11", "license": "apache-2.0", "url": "https://huggingface.co/google/gemma-4-31B-it", "config_url": "https://huggingface.co/google/gemma-4-31B-it", "embedding_params": 1409286144, "embedding_share": 0.0459050861237785, "moe": false, "active_share": null}, {"id": "google/gemma-4-26B-A4B-it", "name": "Gemma 4 26B-A4B", "lab": "Google", "total": 25.2, "active": 3.8, "params_source": "model card: 25.2B total / 3.8B active", "attention": "5 sliding-window (1024) layers per full-attention layer; GQA 16/8", "extras": ["MoE block next to a small dense FFN", "tied embeddings", "vision input"], "layers": 30, "d_model": 2816, "heads": 16, "kv_heads": 8, "head_dim": 256, "ffn": 2112, "expert_ffn": 704, "experts": 128, "experts_active": 8, "experts_shared": 0, "vocab": 262144, "context": 262144, "rope_theta": 1000000.0, "rope_partial": 0.25, "positions": "RoPE", "tied_embeddings": true, "activation": "gelu_pytorch_tanh", "mtp_layers": null, "layer_mix": {"sliding_attention": 25, "full_attention": 5}, "multimodal": true, "model_type": "gemma4_text", "mix_seq": "LLLLLFLLLLLFLLLLLFLLLLLFLLLLLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 5, "local": 25}, "norm": "RMSNorm", "ffn_kind": "GeGLU (tanh)", "released": "2026-03-11", "license": "apache-2.0", "url": "https://huggingface.co/google/gemma-4-26B-A4B-it", "config_url": "https://huggingface.co/google/gemma-4-26B-A4B-it", "embedding_params": 738197504, "embedding_share": 0.029293551746031744, "moe": true, "active_share": 0.15079365079365079}, {"id": "openai/gpt-oss-120b", "name": "gpt-oss-120b", "lab": "OpenAI", "total": 117, "active": 5.1, "params_source": "model card: 117B / 5.1B active", "attention": "Alternating sliding window (128) and full attention, GQA 64/8, attention sinks", "extras": ["MXFP4 experts (fits one 80 GB GPU)", "o200k tokenizer"], "layers": 36, "d_model": 2880, "heads": 64, "kv_heads": 8, "head_dim": 64, "ffn": 2880, "expert_ffn": null, "experts": 128, "experts_active": 4, "experts_shared": 0, "vocab": 201088, "context": 131072, "rope_theta": 150000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 18, "full_attention": 18}, "multimodal": false, "model_type": "gpt_oss", "mix_seq": "LFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLFLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 18, "local": 18}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-08-04", "license": "apache-2.0", "url": "https://huggingface.co/openai/gpt-oss-120b", "config_url": "https://huggingface.co/openai/gpt-oss-120b", "embedding_params": 1158266880, "embedding_share": 0.009899716923076923, "moe": true, "active_share": 0.04358974358974359}, {"id": "openai/gpt-oss-20b", "name": "gpt-oss-20b", "lab": "OpenAI", "total": 21, "active": 3.6, "params_source": "model card: 21B / 3.6B active", "attention": "Alternating sliding window (128) and full attention, GQA 64/8, attention sinks", "extras": ["MXFP4 experts", "o200k tokenizer"], "layers": 24, "d_model": 2880, "heads": 64, "kv_heads": 8, "head_dim": 64, "ffn": 2880, "expert_ffn": null, "experts": 32, "experts_active": 4, "experts_shared": 0, "vocab": 201088, "context": 131072, "rope_theta": 150000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 12, "full_attention": 12}, "multimodal": false, "model_type": "gpt_oss", "mix_seq": "LFLFLFLFLFLFLFLFLFLFLFLF", "ffn_seq": "EEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 12, "local": 12}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-08-04", "license": "apache-2.0", "url": "https://huggingface.co/openai/gpt-oss-20b", "config_url": "https://huggingface.co/openai/gpt-oss-20b", "embedding_params": 1158266880, "embedding_share": 0.05515556571428572, "moe": true, "active_share": 0.17142857142857143}, {"id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct", "name": "Llama 4 Maverick", "lab": "Meta", "total": 400, "active": 17, "params_source": "Meta: 400B total / 17B active (config read from a public mirror, the original is gated)", "attention": "Chunked attention (8192) with RoPE in 3 of 4 layers, the 4th without positions (NoPE); GQA 40/8", "extras": ["MoE only in every other layer, 1 routed + 1 shared expert", "vision input"], "layers": 48, "d_model": 5120, "heads": 40, "kv_heads": 8, "head_dim": 128, "ffn": 8192, "expert_ffn": null, "experts": 128, "experts_active": 1, "experts_shared": 1, "vocab": 202048, "context": 1048576, "rope_theta": 500000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": "llama4_text", "mix_seq": "LLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDEDE", "mixers": {"full": 12, "local": 36}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-04-01", "license": "other", "url": "https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct", "config_url": "https://huggingface.co/unsloth/Llama-4-Maverick-17B-128E-Instruct", "embedding_params": 2068971520, "embedding_share": 0.0051724288, "moe": true, "active_share": 0.0425}, {"id": "mistralai/Mistral-Large-3-675B-Instruct-2512", "name": "Mistral Large 3", "lab": "Mistral AI", "total": 675, "active": 41, "params_source": "model card: 675B total / 41B active (language model 673B / 39B)", "attention": "MLA (KV latent 512, query latent 1536), 128 heads", "kv_note": "MLA latent 512", "extras": ["first 3 layers dense", "vision input", "config from params.json (Mistral format)"], "layers": 61, "d_model": 7168, "heads": 128, "kv_heads": 128, "head_dim": 192, "ffn": 16384, "expert_ffn": 4096, "experts": 128, "experts_active": 4, "experts_shared": 1, "vocab": 131072, "context": 294912, "rope_theta": 10000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": null, "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": null, "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 61}, "norm": "RMSNorm", "ffn_kind": null, "released": "2025-11-28", "license": "apache-2.0", "url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512", "config_url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512", "embedding_params": 1879048192, "embedding_share": 0.0027837750992592593, "moe": true, "active_share": 0.06074074074074074}, {"id": "mistralai/Mistral-Medium-3.5-128B", "name": "Mistral Medium 3.5", "lab": "Mistral AI", "total": 128, "active": null, "params_source": "model name", "attention": "Full attention, GQA 96/8", "extras": ["vision input", "FP8 weights"], "layers": 88, "d_model": 12288, "heads": 96, "kv_heads": 8, "head_dim": 128, "ffn": 28672, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 131072, "context": 262144, "rope_theta": 1000000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": true, "model_type": "ministral3", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 88}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-03-31", "license": "other", "url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B", "config_url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B", "embedding_params": 3221225472, "embedding_share": 0.025165824, "moe": false, "active_share": null}, {"id": "tencent/Hy3", "name": "Hy3", "lab": "Tencent", "total": 295, "active": 21, "params_source": "model card: 295B / 21B activated (+3.8B MTP)", "attention": "Full attention, GQA 64/8, QK-norm", "extras": ["first layer dense", "1 MTP layer"], "layers": 80, "d_model": 4096, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 13312, "expert_ffn": 1536, "experts": 192, "experts_active": 8, "experts_shared": 1, "vocab": 120832, "context": 262144, "rope_theta": 11158840.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "hy_v3", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 80}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-07-02", "license": "apache-2.0", "url": "https://huggingface.co/tencent/Hy3", "config_url": "https://huggingface.co/tencent/Hy3", "embedding_params": 989855744, "embedding_share": 0.0033554432, "moe": true, "active_share": 0.0711864406779661}, {"id": "inclusionAI/Ling-3.0-flash", "name": "Ling-3.0-flash", "lab": "Ant Group (inclusionAI)", "total": 124, "active": 5.1, "params_source": "model card: 124B total / 5.1B active", "attention": "Hybrid: 5 Kimi Delta Attention (linear) layers per MLA layer", "kv_note": "MLA latent 512", "extras": ["first 2 layers dense", "1 MTP layer"], "layers": 42, "d_model": 2560, "heads": 32, "kv_heads": 32, "head_dim": 128, "ffn": 6144, "expert_ffn": 768, "experts": 512, "experts_active": 8, "experts_shared": 1, "vocab": 157184, "context": 262144, "rope_theta": 6000000, "rope_partial": 0.5, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "bailing_hybrid", "mix_seq": "NNNNNFNNNNNFNNNNNFNNNNNFNNNNNFNNNNNFNNNNNF", "ffn_seq": "DDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 7, "linear": 35}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-02", "license": "mit", "url": "https://huggingface.co/inclusionAI/Ling-3.0-flash", "config_url": "https://huggingface.co/inclusionAI/Ling-3.0-flash", "embedding_params": 804782080, "embedding_share": 0.006490178064516129, "moe": true, "active_share": 0.04112903225806451}, {"id": "stepfun-ai/Step-3.5-Flash", "name": "Step 3.5 Flash", "lab": "StepFun", "total": 196.8, "active": 11, "params_source": "model card: 196.81B total / ~11B active", "attention": "1 full-attention layer per 3 sliding-window (512) layers, GQA with 8 groups, head-wise gate", "extras": ["first 3 layers dense", "3 MTP layers"], "layers": 45, "d_model": 4096, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 11264, "expert_ffn": 1280, "experts": 288, "experts_active": 8, "experts_shared": 1, "vocab": 128896, "context": 262144, "rope_theta": 5000000.0, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": null, "mtp_layers": 3, "layer_mix": {"full_attention": 12, "sliding_attention": 36}, "multimodal": false, "model_type": "step3p5", "mix_seq": "FLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 12, "local": 33}, "norm": null, "ffn_kind": null, "released": "2026-02-01", "license": "apache-2.0", "url": "https://huggingface.co/stepfun-ai/Step-3.5-Flash", "config_url": "https://huggingface.co/stepfun-ai/Step-3.5-Flash", "embedding_params": 1055916032, "embedding_share": 0.005365426991869919, "moe": true, "active_share": 0.05589430894308943}, {"id": "ibm-granite/granite-4.2-30b", "name": "Granite 4.2 30B", "lab": "IBM", "total": 29.3, "active": null, "params_source": "stored parameters (BF16)", "attention": "Full attention, GQA 32/8", "extras": [], "layers": 64, "d_model": 4096, "heads": 32, "kv_heads": 8, "head_dim": 128, "ffn": 32768, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 100352, "context": 131072, "rope_theta": 50000000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": null, "multimodal": false, "model_type": "granite", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 64}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2026-08-07", "license": "apache-2.0", "url": "https://huggingface.co/ibm-granite/granite-4.2-30b", "config_url": "https://huggingface.co/ibm-granite/granite-4.2-30b", "embedding_params": 822083584, "embedding_share": 0.028057460204778156, "moe": false, "active_share": null}, {"id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "name": "Nemotron 3 Super", "lab": "NVIDIA", "total": 120, "active": 12, "params_source": "model card: 120B total / 12B active", "attention": "Hybrid: mostly Mamba-2 (state-space) layers, a few attention layers (GQA 32/2)", "extras": ["latent MoE (experts in a 1024-dim space)", "squared-ReLU activation", "1 MTP layer"], "layers": 88, "d_model": 4096, "heads": 32, "kv_heads": 2, "head_dim": 128, "ffn": 2688, "expert_ffn": 2688, "experts": 512, "experts_active": 22, "experts_shared": 1, "vocab": 131072, "context": 262144, "rope_theta": 10000, "rope_partial": 1.0, "positions": "RoPE", "tied_embeddings": false, "activation": "relu2", "mtp_layers": 1, "layer_mix": {"mamba2": 40, "moe": 40, "full_attention": 8}, "multimodal": false, "model_type": "nemotron_h", "mix_seq": "M-M-M-MF-M-M-M-MF-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-M-MF-M-M-M-MF-M-M-M-M-", "ffn_seq": "-E-E-E--E-E-E-E--E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E-E--E-E-E-E--E-E-E-E-E", "mixers": {"full": 8, "linear": 40}, "norm": null, "ffn_kind": "squared ReLU", "released": "2026-03-10", "license": "other", "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "config_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16", "embedding_params": 1073741824, "embedding_share": 0.008947848533333334, "moe": true, "active_share": 0.1}, {"id": "allenai/Olmo-3.1-32B-Instruct", "name": "OLMo 3.1 32B", "lab": "Ai2", "total": 32.2, "active": null, "params_source": "stored parameters (BF16)", "attention": "3 sliding-window (4096) layers per full-attention layer, GQA 40/8", "extras": ["fully open: data and training code published"], "layers": 64, "d_model": 5120, "heads": 40, "kv_heads": 8, "head_dim": 128, "ffn": 27648, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 100278, "context": 65536, "rope_theta": 500000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": null, "layer_mix": {"sliding_attention": 48, "full_attention": 16}, "multimodal": false, "model_type": "olmo3", "mix_seq": "LLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLFLLLF", "ffn_seq": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "mixers": {"full": 16, "local": 48}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-12-10", "license": "apache-2.0", "url": "https://huggingface.co/allenai/Olmo-3.1-32B-Instruct", "config_url": "https://huggingface.co/allenai/Olmo-3.1-32B-Instruct", "embedding_params": 1026846720, "embedding_share": 0.03188964968944099, "moe": false, "active_share": null}, {"id": "baidu/ERNIE-4.5-300B-A47B-PT", "name": "ERNIE 4.5 300B-A47B", "lab": "Baidu", "total": 300, "active": 47, "params_source": "model card: 300B total / 47B activated", "attention": "Full attention, GQA 64/8", "extras": ["first 3 layers dense", "1 MTP layer"], "layers": 54, "d_model": 8192, "heads": 64, "kv_heads": 8, "head_dim": 128, "ffn": 28672, "expert_ffn": 3584, "experts": 64, "experts_active": 8, "experts_shared": 0, "vocab": 103424, "context": 131072, "rope_theta": 500000, "rope_partial": null, "positions": "RoPE", "tied_embeddings": false, "activation": "silu", "mtp_layers": 1, "layer_mix": null, "multimodal": false, "model_type": "ernie4_5_moe", "mix_seq": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "ffn_seq": "DDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "mixers": {"full": 54}, "norm": "RMSNorm", "ffn_kind": "SwiGLU", "released": "2025-06-28", "license": "apache-2.0", "url": "https://huggingface.co/baidu/ERNIE-4.5-300B-A47B-PT", "config_url": "https://huggingface.co/baidu/ERNIE-4.5-300B-A47B-PT", "embedding_params": 1694498816, "embedding_share": 0.005648329386666666, "moe": true, "active_share": 0.15666666666666668}, {"id": "openai-community/gpt2", "name": "GPT-2 small (2019)", "lab": "OpenAI", "reference": true, "total": 0.124, "active": null, "params_source": "OpenAI: 124M", "attention": "Full attention, 12 heads (no GQA)", "extras": ["learned positions", "LayerNorm, GELU"], "layers": 12, "d_model": 768, "heads": 12, "kv_heads": 12, "head_dim": 64, "ffn": 3072, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 50257, "context": 1024, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": true, "activation": "gelu_new", "mtp_layers": null, "layer_mix": null, "multimodal": false, "model_type": "gpt2", "mix_seq": "FFFFFFFFFFFF", "ffn_seq": "DDDDDDDDDDDD", "mixers": {"full": 12}, "norm": "LayerNorm", "ffn_kind": "GELU", "released": "2022-03-02", "license": "mit", "url": "https://huggingface.co/openai-community/gpt2", "config_url": "https://huggingface.co/openai-community/gpt2", "embedding_params": 38597376, "embedding_share": 0.31126916129032256, "moe": false, "active_share": null}, {"id": "roneneldan/TinyStories-1M", "name": "TinyStories-1M (2023)", "lab": "Microsoft Research", "reference": true, "total": 0.0037, "active": null, "params_source": "3.7M stored (1M excluding embeddings)", "attention": "Alternating global and local (256) attention, 16 heads", "extras": ["opens in this simulator"], "layers": 8, "d_model": 64, "heads": 16, "kv_heads": 16, "head_dim": 4, "ffn": 256, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 50257, "context": 2048, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": true, "activation": "gelu_new", "mtp_layers": null, "layer_mix": {"full_attention": 4, "sliding_attention": 4}, "multimodal": false, "model_type": "gpt_neo", "mix_seq": "FLFLFLFL", "ffn_seq": "DDDDDDDD", "mixers": {"full": 4, "local": 4}, "norm": "LayerNorm", "ffn_kind": "GELU", "released": "2023-05-12", "license": "see model card", "url": "https://huggingface.co/roneneldan/TinyStories-1M", "config_url": "https://huggingface.co/roneneldan/TinyStories-1M", "embedding_params": 3216448, "embedding_share": 0.8693102702702703, "moe": false, "active_share": null}, {"id": null, "name": "LLM-Sim tiny (this project)", "lab": "LLM-Sim", "reference": true, "total": 9.184e-06, "active": null, "params_source": "weights/tiny.npz", "attention": "Full attention, 2 heads", "extras": ["character tokenizer", "trains in 2 minutes"], "layers": 2, "d_model": 16, "heads": 2, "kv_heads": 2, "head_dim": 8, "ffn": 64, "expert_ffn": null, "experts": null, "experts_active": null, "experts_shared": null, "vocab": 65, "context": 32, "rope_theta": null, "rope_partial": null, "positions": "learned", "tied_embeddings": false, "activation": "gelu", "mtp_layers": null, "layer_mix": {"full_attention": 2}, "mixers": {"full": 2}, "multimodal": false, "mix_seq": "FF", "ffn_seq": "DD", "norm": "LayerNorm", "ffn_kind": "GELU", "model_type": "llmsim", "released": "2026-09-25", "license": "-", "url": null, "config_url": null, "embedding_params": 2080, "embedding_share": 0.2264808362369338, "moe": false, "active_share": null}]}</script>
+<script type="application/json" id="glossary-data">{
+  "groups": [
+    {"id": "text", "title": "Text and tokens"},
+    {"id": "vectors", "title": "Vectors and positions"},
+    {"id": "block", "title": "The transformer block"},
+    {"id": "output", "title": "Output and generation"},
+    {"id": "training", "title": "Training"},
+    {"id": "modern", "title": "Architectures of recent LLMs"}
+  ],
+  "terms": [
+    {"id": "token", "group": "text", "term": "Token",
+     "aliases": ["tokens", "token"],
+     "short": "The smallest piece of text the model sees: a character, a piece of a word or a whole word, always turned into an integer id.",
+     "long": "A language model never reads characters or words directly: the tokenizer cuts the text into tokens and replaces each one with its number in the vocabulary. Everything the model computes is per token: one row of every matrix in the trace is one token.",
+     "in_llmsim": "\"Text → tokens → ids\", the first step of every prediction.",
+     "related": ["tokenizer", "vocabulary"]},
+    {"id": "tokenizer", "group": "text", "term": "Tokenizer",
+     "aliases": ["tokenizers", "tokenizer"],
+     "short": "Turns text into a sequence of token ids, and ids back into text.",
+     "long": "The tokenizer is fixed before training and is not part of the neural network. It decides how long sequences are and which pieces of text the model can treat as units. Character, BPE and byte-level BPE tokenizers are the three kinds used in this project.",
+     "in_llmsim": "\"Text → tokens → ids\". The three models use a character, a BPE and GPT-2's byte-level BPE tokenizer.",
+     "related": ["token", "char-tokenizer", "bpe", "byte-bpe"]},
+    {"id": "vocabulary", "group": "text", "term": "Vocabulary",
+     "aliases": ["vocabularies", "vocabulary", "vocab"],
+     "short": "Every token the model knows; its size V sets how many rows W_E has and how many logits come out.",
+     "long": "65 tokens for the character model, 256 for the BPE one, 50257 for GPT-2 and TinyStories, 100k–260k for recent LLMs. A larger vocabulary makes texts shorter (fewer tokens) but the embedding and unembedding tables bigger.",
+     "in_llmsim": "The table shown in \"Text → tokens → ids\"; the rows of W_E in the \"weights\" page.",
+     "related": ["token", "embedding", "logits"]},
+    {"id": "char-tokenizer", "group": "text", "term": "Character tokenizer",
+     "aliases": ["character tokenizer", "char tokenizer"],
+     "short": "One token per character: easy to follow, but texts become long sequences.",
+     "long": "The vocabulary is just the set of characters found in the training text. Nothing needs to be learned, every number fits on screen, but the model must spend its layers rebuilding words out of letters.",
+     "in_llmsim": "The default model, weights/tiny.npz.",
+     "related": ["tokenizer", "bpe"]},
+    {"id": "bpe", "group": "text", "term": "BPE (Byte-Pair Encoding)",
+     "aliases": ["byte-pair encoding", "BPE"],
+     "short": "Builds the vocabulary by repeatedly merging the most frequent pair of tokens (\"t\" + \"h\" → \"th\").",
+     "long": "Training starts from single characters (or bytes) and adds one new token per merge until the vocabulary has the wanted size. Frequent words end up as a single token, rare ones are split into pieces, so no text is ever out of vocabulary.",
+     "in_llmsim": "weights/tiny-bpe.npz (256 tokens); train your own with `train --tokenizer bpe`.",
+     "related": ["merges", "byte-bpe", "tokenizer"]},
+    {"id": "merges", "group": "text", "term": "Merges",
+     "aliases": ["merges", "merge"],
+     "short": "The ordered list of pairs that BPE learned to fuse; applied in the same order to tokenize new text.",
+     "long": "Tokenizing with BPE means starting from characters (or bytes) and applying the merges one after the other, earliest learned first. The merge list and the vocabulary together are the whole tokenizer.",
+     "in_llmsim": "\"Text → tokens → ids\" with a BPE model shows the merges applied to the prompt.",
+     "related": ["bpe"]},
+    {"id": "byte-bpe", "group": "text", "term": "Byte-level BPE",
+     "aliases": ["byte-level BPE", "byte-level"],
+     "short": "BPE that starts from the 256 possible bytes instead of characters: any text, in any language, can be encoded.",
+     "long": "The text is first turned into UTF-8 bytes, so the 256 starting tokens cover everything, emoji and every script included. GPT-2 and most LLMs since use it.",
+     "in_llmsim": "The TinyStories model, which uses GPT-2's tokenizer (50257 tokens).",
+     "related": ["bpe", "tokenizer"]},
+    {"id": "prompt", "group": "text", "term": "Prompt",
+     "aliases": ["prompts", "prompt"],
+     "short": "The starting text that the model has to continue.",
+     "long": "The prompt is tokenized and run through the model in one pass; from then on the model adds one token at a time. A chat assistant is the same mechanism with the conversation as prompt.",
+     "in_llmsim": "The text after `step`, e.g. `step \"ROMEO:\"`.",
+     "related": ["autoregressive", "context-window"]},
+    {"id": "context-window", "group": "text", "term": "Context window",
+     "aliases": ["context windows", "context window", "context length", "block size"],
+     "short": "The maximum number of tokens the model looks at at once; beyond it the oldest tokens drop out.",
+     "long": "It is fixed by the architecture (the size of the position table, or how far RoPE was trained) and by the memory of the KV-cache. 32 tokens for the small models here, 2048 for TinyStories, 128k–1M for recent LLMs.",
+     "in_llmsim": "Try a prompt longer than 32 tokens and watch the window slide.",
+     "related": ["kv-cache", "positional-encoding"]},
+
+    {"id": "embedding", "group": "vectors", "term": "Embedding",
+     "aliases": ["token embeddings", "token embedding", "embeddings", "embedding", "W_E"],
+     "short": "The vector of numbers that stands for a token: one row of the matrix W_E, picked by the token id.",
+     "long": "Looking up an embedding is the same as multiplying a one-hot vector by W_E. The rows are learned: tokens that behave alike end up with similar vectors.",
+     "in_llmsim": "\"Token embedding lookup\"; the matrix W_E in the \"weights\" page.",
+     "related": ["vocabulary", "d-model", "unembedding"]},
+    {"id": "d-model", "group": "vectors", "term": "d_model",
+     "aliases": ["d_model", "model width", "hidden size"],
+     "short": "The width of the vectors that flow through the model: 16 here, 768 in GPT-2, 4096–8192 in large LLMs.",
+     "long": "Every token is a vector of d_model numbers from the embedding to the final LayerNorm. Most weight matrices have d_model rows or columns, so it largely sets the size of the model.",
+     "in_llmsim": "Shown in the header of every page; `info` lists every matrix with its shape.",
+     "related": ["residual-stream", "d-ff", "d-head"]},
+    {"id": "positional-encoding", "group": "vectors", "term": "Positional encoding",
+     "aliases": ["positional encodings", "positional encoding", "position encoding", "positional embedding"],
+     "short": "How the model knows the order of the tokens: without it, \"dog bites man\" and \"man bites dog\" look the same.",
+     "long": "Attention by itself treats its input as a set. Order is added either by summing a position vector to every token (learned or sinusoidal), or by rotating queries and keys inside attention (RoPE).",
+     "in_llmsim": "\"Positional encoding\" and \"Positional encoding: how P is obtained, and why\".",
+     "related": ["learned-pos", "rope"]},
+    {"id": "learned-pos", "group": "vectors", "term": "Learned position embedding",
+     "aliases": ["learned position embeddings", "learned position embedding", "position embeddings", "position embedding", "position vector", "position matrix"],
+     "short": "A learned vector P[t] for every position t, added to the token embedding (GPT-2).",
+     "long": "The table P has one row per position of the context window and is trained like every other weight. Its drawback: the model cannot handle positions beyond the table.",
+     "in_llmsim": "The matrix P of the default model; \"Input to the first block\" shows x_tok + x_pos.",
+     "related": ["positional-encoding", "rope", "context-window"]},
+    {"id": "rope", "group": "vectors", "term": "RoPE (Rotary Position Embedding)",
+     "aliases": ["rotary position embedding", "RoPE"],
+     "short": "Rotates every query and key by an angle proportional to its position, so q·k depends only on how far apart two tokens are.",
+     "long": "The vector is split in pairs of dimensions, each rotated at its own speed; θ sets the slowest one, and long-context models use a large θ. Nothing is added to the residual stream. Used by Llama, Qwen, DeepSeek and most recent LLMs.",
+     "in_llmsim": "weights/tiny-rope.npz, or `train --pos rope`; see \"Queries, keys, values\".",
+     "related": ["positional-encoding", "qkv"]},
+    {"id": "residual-stream", "group": "vectors", "term": "Residual stream",
+     "aliases": ["residual streams", "residual stream"],
+     "short": "The vector of each position that runs through all the blocks; every block adds its contribution to it.",
+     "long": "Attention and feed-forward never replace the vector, they add to it, so it accumulates everything the layers computed. It starts as embedding + position (x₀) and ends in the final LayerNorm.",
+     "in_llmsim": "\"Input to the first block\" (x₀) and every \"Residual connection\" step.",
+     "related": ["residual-connection", "d-model"]},
+    {"id": "residual-connection", "group": "vectors", "term": "Residual connection",
+     "aliases": ["residual connections", "residual connection", "skip connection"],
+     "short": "The sum x + f(x) around attention and around the feed-forward: the block adds to its input instead of replacing it.",
+     "long": "It keeps the information of the earlier layers and, during training, carries the gradient straight through every block, which is what makes deep networks trainable.",
+     "in_llmsim": "The \"Residual connection\" steps of every layer.",
+     "related": ["residual-stream", "backpropagation"]},
+    {"id": "activation", "group": "vectors", "term": "Activation (hidden state)",
+     "aliases": ["activations", "hidden states", "hidden state"],
+     "short": "Any intermediate vector computed during the forward pass, as opposed to the weights, which are fixed.",
+     "long": "Every matrix in a prediction trace that has one row per token is an activation. Training has to keep them in memory, because the backward pass needs them to compute the gradients.",
+     "in_llmsim": "Every table of the prediction trace with tokens as rows.",
+     "related": ["forward-pass", "parameters"]},
+
+    {"id": "block", "group": "block", "term": "Transformer block (layer)",
+     "aliases": ["transformer blocks", "transformer block"],
+     "short": "The unit repeated N times: LayerNorm → attention → add, LayerNorm → feed-forward → add.",
+     "long": "All blocks have the same shape but their own weights. Attention moves information between tokens, the feed-forward transforms each token on its own. 2 blocks here, 12 in GPT-2, 30–100 in large LLMs.",
+     "in_llmsim": "The \"Layer N\" sections of the trace; the dashed box of the block diagram.",
+     "related": ["layernorm", "self-attention", "ffn", "residual-connection"]},
+    {"id": "layernorm", "group": "block", "term": "LayerNorm",
+     "aliases": ["layer normalization", "LayerNorm"],
+     "short": "Brings each vector to mean 0 and variance 1, then rescales it with the learned weights γ and β.",
+     "long": "It keeps the numbers in a stable range whatever the earlier layers did. GPT-2 puts one before attention, one before the feed-forward (pre-norm) and one at the end.",
+     "in_llmsim": "The \"LayerNorm\" steps and \"Final LayerNorm\"; γ and β in the \"weights\" page.",
+     "related": ["rmsnorm", "block"]},
+    {"id": "rmsnorm", "group": "block", "term": "RMSNorm",
+     "aliases": ["RMSNorm"],
+     "short": "A simpler LayerNorm: divides by the root mean square without subtracting the mean, and has no β (Llama, Qwen).",
+     "long": "Cheaper and, in practice, as good as LayerNorm, so most recent LLMs use it.",
+     "in_llmsim": "Not used here: the models use LayerNorm.",
+     "related": ["layernorm"]},
+    {"id": "self-attention", "group": "block", "term": "Self-attention",
+     "aliases": ["self-attention", "attention layer", "attention"],
+     "short": "Each token gathers information from the other tokens, weighing them by how relevant they are.",
+     "long": "Every token compares its query with the keys of the tokens before it, turns the scores into weights with a softmax, and takes the weighted sum of their values. It is the only place where tokens exchange information.",
+     "in_llmsim": "From \"Queries, keys, values\" to \"Concatenate heads + output projection\".",
+     "related": ["qkv", "attention-score", "attention-weights", "causal-mask", "multi-head"]},
+    {"id": "qkv", "group": "block", "term": "Query, key, value (Q, K, V)",
+     "aliases": ["queries, keys, values", "queries, keys and values", "queries and keys", "query", "queries", "keys", "W_Q", "W_K", "W_V"],
+     "short": "Three projections of each token: the query says what it looks for, the key what it offers, the value what it passes on if chosen.",
+     "long": "They are the products x·W_Q, x·W_K and x·W_V of the normalized residual stream. The match between a query and a key decides how much of that key's value the token takes.",
+     "in_llmsim": "\"Projection weights W_Q, W_K, W_V\" and \"Queries, keys, values\".",
+     "related": ["self-attention", "attention-score", "kv-cache"]},
+    {"id": "attention-score", "group": "block", "term": "Attention score",
+     "aliases": ["attention scores", "attention score"],
+     "short": "q·k / √d_h: how relevant one token is to another, before the softmax.",
+     "long": "One number per pair (query token, key token). Dividing by √d_h keeps the scores in a range where the softmax is not too sharp.",
+     "in_llmsim": "\"Attention scores\".",
+     "related": ["qkv", "attention-weights", "causal-mask"]},
+    {"id": "attention-weights", "group": "block", "term": "Attention weights (pattern)",
+     "aliases": ["attention weights", "attention pattern", "attention patterns"],
+     "short": "The scores after the softmax: row i says how token i spreads its attention over the tokens up to itself; each row sums to 1.",
+     "long": "This is the heatmap of every head. Each head learns its own pattern, e.g. look at the previous token, or at the start of the line.",
+     "in_llmsim": "The heatmap of \"Causal mask + softmax\"; used in \"Weighted sum of values\".",
+     "related": ["attention-score", "softmax", "attention-head"]},
+    {"id": "causal-mask", "group": "block", "term": "Causal mask",
+     "aliases": ["causal masks", "causal mask", "causal masking"],
+     "short": "Sets to −∞ the scores towards future positions, so a token only sees itself and the past.",
+     "long": "After the softmax those positions get weight 0. It is what lets training predict every position of a sequence at once without peeking at the answer.",
+     "in_llmsim": "\"Causal mask + softmax\": the −∞ entries and the · in the heatmap.",
+     "related": ["attention-score", "next-token"]},
+    {"id": "attention-head", "group": "block", "term": "Attention head",
+     "aliases": ["attention heads", "attention head", "heads", "head"],
+     "short": "One independent copy of attention working on d_h columns, with its own attention pattern.",
+     "long": "Splitting attention into heads lets the model follow several relations at once. It costs nothing extra: one big product gives the queries, keys and values of every head side by side.",
+     "in_llmsim": "The \"head N\" lanes of the block diagram; 2 heads here, 16 in TinyStories.",
+     "related": ["multi-head", "d-head"]},
+    {"id": "multi-head", "group": "block", "term": "Multi-head attention",
+     "aliases": ["multi-head attention", "multi-head"],
+     "short": "Several heads in parallel; their outputs are concatenated and mixed back by W_O.",
+     "long": "[out¹ | … | outᴴ]·W_O = out¹·W_O¹ + … + outᴴ·W_Oᴴ: each head adds its own contribution in the full model width.",
+     "in_llmsim": "\"Concatenate heads + output projection\".",
+     "related": ["attention-head", "w-o", "gqa"]},
+    {"id": "d-head", "group": "block", "term": "d_h (head dimension)",
+     "aliases": ["head dimension", "d_head", "d_h"],
+     "short": "The number of columns of each head: d_model / number of heads.",
+     "long": "8 here (16 / 2), 64 in GPT-2, usually 64–128 in large LLMs. The attention scores are divided by √d_h.",
+     "in_llmsim": "\"Queries, keys, values\" splits Q, K, V into d_h columns per head.",
+     "related": ["attention-head", "d-model"]},
+    {"id": "w-o", "group": "block", "term": "Output projection W_O",
+     "aliases": ["output projection", "W_O"],
+     "short": "The matrix that brings the concatenated heads back to the model width d_model and mixes them.",
+     "long": "Its result is added to the residual stream.",
+     "in_llmsim": "\"Concatenate heads + output projection\"; W_O in the \"weights\" page.",
+     "related": ["multi-head", "residual-connection"]},
+    {"id": "ffn", "group": "block", "term": "Feed-forward network (FFN, MLP)",
+     "aliases": ["feed-forward networks", "feed-forward network", "feed-forward", "FFN", "MLP"],
+     "short": "Two matrix products with a non-linearity in between, applied to each token on its own.",
+     "long": "It widens the vector to d_ff, applies GELU, and projects back to d_model. Most of the parameters of a dense model are here; it is thought to store much of what the model knows.",
+     "in_llmsim": "\"Feed-forward: expand + GELU\" and \"Feed-forward: project back\".",
+     "related": ["d-ff", "gelu", "swiglu", "moe"]},
+    {"id": "d-ff", "group": "block", "term": "d_ff",
+     "aliases": ["d_ff"],
+     "short": "The inner width of the feed-forward network, usually 4 × d_model (64 here).",
+     "long": "W₁ has shape d_model × d_ff and W₂ d_ff × d_model.",
+     "in_llmsim": "W₁ and W₂ in the \"weights\" page.",
+     "related": ["ffn", "d-model"]},
+    {"id": "gelu", "group": "block", "term": "GELU",
+     "aliases": ["GELU"],
+     "short": "The non-linearity of GPT-2's feed-forward: like ReLU (negative values → 0) but smooth near zero.",
+     "long": "Without a non-linearity the two products of the feed-forward would collapse into a single matrix and the whole network into a linear map.",
+     "in_llmsim": "\"Feed-forward: expand + GELU\".",
+     "related": ["ffn", "swiglu"]},
+    {"id": "swiglu", "group": "block", "term": "SwiGLU",
+     "aliases": ["SwiGLU"],
+     "short": "A gated feed-forward: one projection, passed through SiLU, multiplies a second one (Llama, Qwen, DeepSeek).",
+     "long": "It uses three matrices instead of two and gives better results for the same compute, so most recent LLMs use it.",
+     "in_llmsim": "Not used here: the models use GELU.",
+     "related": ["ffn", "gelu"]},
+
+    {"id": "unembedding", "group": "output", "term": "Unembedding (W_U)",
+     "aliases": ["unembedding", "W_U"],
+     "short": "The matrix that turns the last vector into one score per token of the vocabulary.",
+     "long": "It has shape d_model × V. Each column is a direction in the residual stream: the more the final vector points that way, the higher that token's logit.",
+     "in_llmsim": "\"Logits (unembedding)\"; W_U in the \"weights\" page.",
+     "related": ["logits", "weight-tying", "embedding"]},
+    {"id": "weight-tying", "group": "output", "term": "Weight tying (tied embeddings)",
+     "aliases": ["tied embeddings", "weight tying"],
+     "short": "W_U is the transpose of W_E: one table for input and output, saving vocabulary × d_model parameters.",
+     "long": "Common in small models, where the embedding tables are a large share of all the parameters; large models usually keep them separate.",
+     "in_llmsim": "W_E and W_U are separate in the trained models (\"weights\" page).",
+     "related": ["embedding", "unembedding"]},
+    {"id": "logits", "group": "output", "term": "Logits",
+     "aliases": ["logits", "logit"],
+     "short": "The raw scores, one per token of the vocabulary, that the model outputs before the softmax.",
+     "long": "They can be any real number; only their differences matter. The softmax turns them into probabilities.",
+     "in_llmsim": "\"Logits (unembedding)\" and \"Last position → scores for the next token\".",
+     "related": ["softmax", "unembedding", "temperature"]},
+    {"id": "softmax", "group": "output", "term": "Softmax",
+     "aliases": ["softmax"],
+     "short": "Turns a list of scores into positive probabilities that sum to 1: exp(zᵢ) / Σ exp(zⱼ).",
+     "long": "Used twice: on the attention scores of every head and on the final logits. A larger gap between two scores means a much larger gap between their probabilities.",
+     "in_llmsim": "\"Causal mask + softmax\" and \"Softmax → probabilities\".",
+     "related": ["logits", "attention-weights", "temperature"]},
+    {"id": "next-token", "group": "output", "term": "Next-token prediction",
+     "aliases": ["next-token prediction", "next token prediction"],
+     "short": "The model's only task: given the text so far, the probability of every possible next token.",
+     "long": "Everything an LLM does, from stories to code, comes from repeating this one prediction. Training teaches exactly this task on every position of the corpus.",
+     "in_llmsim": "\"Softmax → probabilities\".",
+     "related": ["autoregressive", "cross-entropy"]},
+    {"id": "autoregressive", "group": "output", "term": "Autoregressive generation",
+     "aliases": ["autoregressive generation", "autoregressive"],
+     "short": "The chosen token is appended to the text and the model runs again: one token per pass.",
+     "long": "This is why generating is sequential and why the KV-cache helps so much: each pass only adds one new token.",
+     "in_llmsim": "Keep pressing Enter in `step` after the first token.",
+     "related": ["next-token", "kv-cache", "sampling"]},
+    {"id": "sampling", "group": "output", "term": "Sampling",
+     "aliases": ["sampling", "sampled"],
+     "short": "Drawing the next token at random according to the probabilities, after temperature, top-k and top-p.",
+     "long": "Sampling instead of always taking the best token gives more varied and natural text; the same prompt can give different continuations.",
+     "in_llmsim": "\"Pick the next token\".",
+     "related": ["temperature", "top-k", "top-p", "greedy"]},
+    {"id": "greedy", "group": "output", "term": "Greedy decoding",
+     "aliases": ["greedy decoding", "greedy"],
+     "short": "Always taking the most likely token (temperature 0): deterministic, but often repetitive.",
+     "long": "",
+     "in_llmsim": "`step \"ROMEO:\" -t 0`.",
+     "related": ["sampling", "temperature"]},
+    {"id": "temperature", "group": "output", "term": "Temperature",
+     "aliases": ["temperature"],
+     "short": "Divides the logits before the softmax: below 1 the choice is more predictable, above 1 more random.",
+     "long": "At 0 it becomes greedy decoding; very high temperatures flatten the distribution towards uniform.",
+     "in_llmsim": "The `-t` option of `step`; \"Pick the next token\".",
+     "related": ["sampling", "logits", "greedy"]},
+    {"id": "top-k", "group": "output", "term": "Top-k",
+     "aliases": ["top-k"],
+     "short": "Keeps only the k most likely tokens before drawing, cutting the long tail of unlikely ones.",
+     "long": "",
+     "in_llmsim": "`step \"ROMEO:\" --top-k 5`.",
+     "related": ["sampling", "top-p"]},
+    {"id": "top-p", "group": "output", "term": "Top-p (nucleus sampling)",
+     "aliases": ["nucleus sampling", "top-p"],
+     "short": "Keeps the most likely tokens until their probabilities add up to p, then draws among them.",
+     "long": "Unlike top-k, the number of candidates adapts: few when the model is sure, many when it is not.",
+     "in_llmsim": "`step \"ROMEO:\" --top-p 0.9`.",
+     "related": ["sampling", "top-k"]},
+    {"id": "kv-cache", "group": "output", "term": "KV-cache",
+     "aliases": ["KV-cache", "KV cache"],
+     "short": "Stores the keys and values of the tokens already seen, so each new token only computes its own row.",
+     "long": "Without it every new token would recompute the whole sequence. Its memory grows with the context length × layers × heads, which is what GQA, MLA and local attention try to reduce.",
+     "in_llmsim": "The \"KV-cache\" box of the diagram; compare with `--no-kv-cache`.",
+     "related": ["qkv", "autoregressive", "gqa", "mla"]},
+    {"id": "forward-pass", "group": "output", "term": "Forward pass (inference)",
+     "aliases": ["forward passes", "forward pass", "inference"],
+     "short": "The computation from the tokens to the logits, without changing any weight.",
+     "long": "Generating text is a sequence of forward passes. Training runs a forward pass too, then a backward pass to compute the gradients.",
+     "in_llmsim": "The whole prediction trace (`step`).",
+     "related": ["backpropagation", "activation"]},
+
+    {"id": "parameters", "group": "training", "term": "Parameters (weights)",
+     "aliases": ["parameters", "parameter", "weights"],
+     "short": "The learned numbers of the model: every matrix W and bias b. Their count is the size of the model.",
+     "long": "About 9k in the default model, 15k in the BPE one, 1M in TinyStories-1M, 124M in GPT-2, hundreds of billions in large LLMs. They do not change while generating, only during training.",
+     "in_llmsim": "`info` and the \"weights\" page list every one of them.",
+     "related": ["gradient", "active-params"]},
+    {"id": "corpus", "group": "training", "term": "Training corpus",
+     "aliases": ["training corpus", "corpus"],
+     "short": "The text the model learns from: tiny Shakespeare here, children's stories for TinyStories, trillions of tokens for large LLMs.",
+     "long": "The model can only learn the patterns present in its corpus: that is why the small models write Shakespeare-like text.",
+     "in_llmsim": "data/corpus.txt.",
+     "related": ["batch", "overfitting"]},
+    {"id": "batch", "group": "training", "term": "Batch",
+     "aliases": ["batches", "batch"],
+     "short": "A group of text windows processed together in one training step; their losses are averaged.",
+     "long": "Averaging over many windows gives a less noisy gradient. The training page uses a single window, to keep every number visible.",
+     "in_llmsim": "\"Inputs and targets\" of the training page.",
+     "related": ["input-target", "step"]},
+    {"id": "input-target", "group": "training", "term": "Inputs and targets",
+     "aliases": ["targets", "target"],
+     "short": "The targets are the inputs shifted by one token: every position must predict the token that follows it.",
+     "long": "From a window of T+1 tokens, the first T are the input and the last T the targets. Thanks to the causal mask, one forward pass gives T predictions to learn from.",
+     "in_llmsim": "\"Inputs and targets\".",
+     "related": ["next-token", "causal-mask", "cross-entropy"]},
+    {"id": "loss", "group": "training", "term": "Loss",
+     "aliases": ["loss"],
+     "short": "One number that measures how wrong the predictions are; training is the search for weights that make it small.",
+     "long": "For language models it is the cross-entropy averaged over every position of the batch. ln V (4.17 for 65 tokens) is the loss of a model guessing at random.",
+     "in_llmsim": "\"Loss: cross-entropy\"; the title of each pass of the training page.",
+     "related": ["cross-entropy", "perplexity", "gradient"]},
+    {"id": "cross-entropy", "group": "training", "term": "Cross-entropy",
+     "aliases": ["cross-entropy", "cross entropy"],
+     "short": "−log of the probability the model gave to the correct next token, averaged over the positions.",
+     "long": "It is 0 when the model is sure and right, and grows without limit when it gives the right token a tiny probability. Its gradient with respect to the logits is simply probabilities − one-hot target.",
+     "in_llmsim": "\"Loss: cross-entropy\" and \"Gradient of the loss w.r.t. the logits\".",
+     "related": ["loss", "softmax", "perplexity"]},
+    {"id": "perplexity", "group": "training", "term": "Perplexity",
+     "aliases": ["perplexity"],
+     "short": "exp(loss): how many tokens the model is, on average, hesitating between.",
+     "long": "A perplexity of 65 for the character model means pure guessing; a well-trained model gets much lower.",
+     "in_llmsim": "Compute it from the loss of the training page.",
+     "related": ["loss", "cross-entropy"]},
+    {"id": "gradient", "group": "training", "term": "Gradient",
+     "aliases": ["gradients", "gradient", "∂L/∂W"],
+     "short": "For every weight, how much the loss changes if that weight grows a little (∂L/∂W).",
+     "long": "It has the same shape as the weight. Moving each weight a small step against its gradient lowers the loss: that is gradient descent.",
+     "in_llmsim": "The \"Gradient\" steps of the training page.",
+     "related": ["backpropagation", "learning-rate", "gradient-clipping"]},
+    {"id": "backpropagation", "group": "training", "term": "Backpropagation",
+     "aliases": ["backpropagation", "backward pass", "backprop"],
+     "short": "Computing the gradients by going back through the layers, last to first, with the chain rule.",
+     "long": "Each layer receives the gradient of its output, and returns the gradient of its input (passed on to the layer before) and of its own weights. It costs about twice the forward pass.",
+     "in_llmsim": "\"Gradient through: …\" steps, from the unembedding back to the embeddings.",
+     "related": ["gradient", "forward-pass", "residual-connection"]},
+    {"id": "gradient-clipping", "group": "training", "term": "Gradient clipping",
+     "aliases": ["gradient clipping", "clipping"],
+     "short": "If the overall norm ‖g‖ of the gradient is above a threshold, it is scaled down to it: no huge jumps.",
+     "long": "The direction stays the same, only the length is limited. It protects training from the occasional batch with an exploding gradient.",
+     "in_llmsim": "\"Gradient clipping\".",
+     "related": ["gradient", "learning-rate"]},
+    {"id": "learning-rate", "group": "training", "term": "Learning rate",
+     "aliases": ["learning rates", "learning rate"],
+     "short": "How large a step the optimizer takes at every update.",
+     "long": "Too small and training crawls; too large and the loss jumps around or goes up. 0.003 by default here.",
+     "in_llmsim": "`train-step --lr 0.01` versus the default.",
+     "related": ["optimizer", "lr-schedule"]},
+    {"id": "lr-schedule", "group": "training", "term": "Warmup and learning-rate schedule",
+     "aliases": ["learning-rate schedule", "warmup"],
+     "short": "The learning rate changes during training: it rises from almost 0 (warmup), then slowly decays.",
+     "long": "`train` uses a linear warmup over the first 5% of the steps, then a cosine decay to 10% of the peak value.",
+     "in_llmsim": "`python main.py train`.",
+     "related": ["learning-rate"]},
+    {"id": "optimizer", "group": "training", "term": "Optimizer",
+     "aliases": ["optimizers", "optimizer"],
+     "short": "The rule that turns the gradients into updates of the weights.",
+     "long": "The simplest is plain gradient descent, w ← w − lr·g. LLMs almost always use AdamW.",
+     "in_llmsim": "\"AdamW update\".",
+     "related": ["adamw", "learning-rate"]},
+    {"id": "adamw", "group": "training", "term": "AdamW",
+     "aliases": ["AdamW"],
+     "short": "The optimizer of LLMs: keeps a running average of each gradient (momentum) and of its square, plus weight decay.",
+     "long": "Dividing by the root of the squared average gives every weight a step of similar size, whatever the scale of its gradient. The \"W\" is the decoupled weight decay.",
+     "in_llmsim": "\"AdamW update\" shows m, v and the change of every weight.",
+     "related": ["optimizer", "weight-decay", "gradient"]},
+    {"id": "weight-decay", "group": "training", "term": "Weight decay",
+     "aliases": ["weight decay"],
+     "short": "Gently pulls every weight towards zero at each step, so the model does not rely on a few huge weights.",
+     "long": "A form of regularization: it helps the model generalize instead of memorizing.",
+     "in_llmsim": "Part of the \"AdamW update\" (0.01 here).",
+     "related": ["adamw", "overfitting"]},
+    {"id": "step", "group": "training", "term": "Training step and epoch",
+     "aliases": ["training steps", "training step", "epochs", "epoch"],
+     "short": "A step is one update of the weights on one batch; an epoch is one pass over the whole corpus.",
+     "long": "LLMs are often trained for about one epoch over a huge corpus; small models see their corpus many times.",
+     "in_llmsim": "`train-step`: press Enter for the next step on the same batch.",
+     "related": ["batch", "optimizer"]},
+    {"id": "overfitting", "group": "training", "term": "Overfitting",
+     "aliases": ["overfitting", "overfit"],
+     "short": "The model learns its training text by heart instead of general patterns: low training loss, high loss on new text.",
+     "long": "That is why part of the corpus is kept aside (validation) to check the loss on text the model never trained on.",
+     "in_llmsim": "`train` prints the validation loss next to the training loss.",
+     "related": ["corpus", "weight-decay"]},
+    {"id": "pretrained", "group": "training", "term": "Pretrained model (checkpoint)",
+     "aliases": ["pretrained models", "pretrained model", "pretrained", "checkpoint"],
+     "short": "Weights already trained by someone else and saved to a file, loaded and used as they are.",
+     "long": "Open-weight LLMs are distributed as checkpoints; tools/import_hf.py converts one from Hugging Face to this project's format.",
+     "in_llmsim": "weights/tinystories-1m.npz (TinyStories-1M).",
+     "related": ["open-weight", "parameters"]},
+
+    {"id": "open-weight", "group": "modern", "term": "Open-weight model",
+     "aliases": ["open-weight models", "open-weight"],
+     "short": "An LLM whose trained weights can be downloaded and run by anyone.",
+     "long": "Training data and code are not necessarily published: the weights and the architecture (its config.json) are.",
+     "in_llmsim": "The comparison page.",
+     "related": ["pretrained"]},
+    {"id": "moe", "group": "modern", "term": "Mixture of Experts (MoE)",
+     "aliases": ["mixture-of-experts", "mixture of experts", "MoE"],
+     "short": "The feed-forward is replaced by many smaller FFNs (experts) and a router that sends each token to a few of them.",
+     "long": "Total parameters grow, the work per token does not: a model can store a lot while each token only uses a small share of it.",
+     "in_llmsim": "The \"Feed-forward\" steps: one FFN per layer (a dense model).",
+     "related": ["router", "active-params", "shared-expert", "ffn"]},
+    {"id": "router", "group": "modern", "term": "Router",
+     "aliases": ["routers", "router"],
+     "short": "The small layer of a MoE that scores the experts for each token and picks the best few.",
+     "long": "It is a linear layer plus a softmax or sigmoid, trained with the rest of the model and usually with an extra term that keeps the experts evenly used.",
+     "in_llmsim": "",
+     "related": ["moe"]},
+    {"id": "shared-expert", "group": "modern", "term": "Shared expert",
+     "aliases": ["shared experts", "shared expert"],
+     "short": "An expert that every token goes through, next to the routed ones: it learns what is common to all tokens.",
+     "long": "",
+     "in_llmsim": "",
+     "related": ["moe"]},
+    {"id": "active-params", "group": "modern", "term": "Active parameters",
+     "aliases": ["active parameters"],
+     "short": "The parameters one token actually uses: attention, shared parts and the chosen experts.",
+     "long": "They set the compute per token; the total parameters set the memory. In a dense model the two are the same.",
+     "in_llmsim": "",
+     "related": ["moe", "parameters", "dense"]},
+    {"id": "dense", "group": "modern", "term": "Dense model",
+     "aliases": ["dense models", "dense model"],
+     "short": "A model where every parameter is used for every token, as opposed to a mixture of experts.",
+     "long": "",
+     "in_llmsim": "All the models of this simulator are dense.",
+     "related": ["moe", "active-params"]},
+    {"id": "gqa", "group": "modern", "term": "GQA (grouped-query attention)",
+     "aliases": ["grouped-query attention", "GQA", "MQA"],
+     "short": "Several query heads share one key/value head (e.g. 64 query heads, 8 KV heads), so the KV-cache is 8× smaller.",
+     "long": "MQA (multi-query attention) is the extreme case with a single KV head.",
+     "in_llmsim": "Every head has its own K and V (\"Queries, keys, values\").",
+     "related": ["kv-cache", "multi-head", "mla"]},
+    {"id": "mla", "group": "modern", "term": "MLA (multi-head latent attention)",
+     "aliases": ["multi-head latent attention", "MLA"],
+     "short": "Keys and values are rebuilt from a small latent vector (e.g. 512 numbers) per token; only the latent goes in the KV-cache.",
+     "long": "Introduced by DeepSeek-V2.",
+     "in_llmsim": "The KV-cache stores full K and V rows.",
+     "related": ["kv-cache", "gqa"]},
+    {"id": "local-attention", "group": "modern", "term": "Sliding window (local attention)",
+     "aliases": ["sliding-window attention", "sliding window", "local attention"],
+     "short": "A layer only looks at the last N tokens (128 … 4096): cheap, and alternated with full-attention layers.",
+     "long": "The full-attention layers keep the long-range view, the local ones keep the cost and the KV-cache small.",
+     "in_llmsim": "In the TinyStories model half of the layers are local (window 256).",
+     "related": ["self-attention", "kv-cache", "linear-attention"]},
+    {"id": "linear-attention", "group": "modern", "term": "Linear attention / state space (DeltaNet, KDA, Mamba)",
+     "aliases": ["linear attention", "state-space", "state space"],
+     "short": "Instead of a KV-cache that grows with the text, the layer keeps a fixed-size state updated at every token.",
+     "long": "Cost linear in the length of the text. Usually mixed with a few full-attention layers.",
+     "in_llmsim": "",
+     "related": ["local-attention", "kv-cache"]},
+    {"id": "sparse-attention", "group": "modern", "term": "Sparse attention (DSA, CSA)",
+     "aliases": ["sparse attention"],
+     "short": "A small \"indexer\" scores the past tokens and attention runs only on the top-k of them (e.g. 1024 out of 1M).",
+     "long": "",
+     "in_llmsim": "The \"Causal mask + softmax\" step weighs all past tokens.",
+     "related": ["self-attention", "local-attention"]},
+    {"id": "mtp", "group": "modern", "term": "Multi-token prediction (MTP)",
+     "aliases": ["multi-token prediction", "MTP"],
+     "short": "Extra small layers trained to predict the 2nd, 3rd … next token; used to speed up generation (speculative decoding).",
+     "long": "",
+     "in_llmsim": "One token per forward pass (\"Pick the next token\").",
+     "related": ["next-token", "autoregressive"]},
+    {"id": "quantization", "group": "modern", "term": "Quantization",
+     "aliases": ["quantization", "quantized"],
+     "short": "Storing the weights with fewer bits (8, 4 or less instead of 16) so the model takes less memory and runs faster.",
+     "long": "A small loss of precision for a large saving: a 70B model goes from 140 GB in 16-bit to about 35 GB in 4-bit.",
+     "in_llmsim": "The weights here are 32-bit floats.",
+     "related": ["parameters"]}
+  ]
+}
+</script>
+<script>
+// Glossary terms in the descriptive texts: the first occurrence of each term in a text is underlined,
+// hovering or focusing it shows the short definition, clicking it opens the term in glossary.html.
+// Shared by every page (Python and C++); the terms come from glossary.json, inlined in the page
+// as <script type="application/json" id="glossary-data"> by the page generators.
+const GLOSSARY = (() => {
+  const node = document.getElementById("glossary-data");
+  const g = node ? JSON.parse(node.textContent) : { groups: [], terms: [] };
+  const byId = Object.fromEntries(g.terms.map(t => [t.id, t]));
+  // alias (lower case) -> term; aliases with capitals (BPE, W_E, LayerNorm) must match exactly
+  const byAlias = {};
+  g.terms.forEach(t => t.aliases.forEach(a => { byAlias[a.toLowerCase()] = { term: t, alias: a, exact: /[A-Z]/.test(a) }; }));
+  const alts = Object.keys(byAlias).sort((a, b) => b.length - a.length)
+    .map(a => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const re = alts.length ? new RegExp(`(?<![\\p{L}\\p{N}_])(?:${alts.join("|")})(?![\\p{L}\\p{N}_])`, "giu") : null;
+  return { groups: g.groups, terms: g.terms, byId, byAlias, re };
+})();
+
+const SKIP = new Set(["A", "CODE", "KBD", "PRE", "SCRIPT", "STYLE", "BUTTON", "SELECT", "TEXTAREA", "SVG"]);
+
+// Wraps the glossary terms found in the text of `root`.
+// url: the glossary page ("" for the same page, null: tooltip only); seen: ids already linked, shared between calls;
+// self: id of a term not to link (the entry the text belongs to).
+function linkTerms(root, { url = null, newTab = false, seen = new Set(), self = null } = {}) {
+  if (!root || !GLOSSARY.re) return seen;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => {
+      for (let p = n.parentElement; p && p !== root.parentElement; p = p.parentElement)
+        if (SKIP.has(p.tagName.toUpperCase()) || p.classList.contains("term")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const n of nodes) {
+    const text = n.nodeValue, parts = [];
+    let last = 0, m;
+    GLOSSARY.re.lastIndex = 0;
+    while ((m = GLOSSARY.re.exec(text))) {
+      const hit = GLOSSARY.byAlias[m[0].toLowerCase()];
+      if (!hit || (hit.exact && m[0] !== hit.alias) || seen.has(hit.term.id) || hit.term.id === self) continue;
+      seen.add(hit.term.id);
+      parts.push(document.createTextNode(text.slice(last, m.index)), termElement(m[0], hit.term, url, newTab));
+      last = m.index + m[0].length;
+    }
+    if (!parts.length) continue;
+    parts.push(document.createTextNode(text.slice(last)));
+    n.replaceWith(...parts);
+  }
+  return seen;
+}
+
+function termElement(text, term, url, newTab) {
+  const e = document.createElement(url != null ? "a" : "span");
+  e.className = "term";
+  e.textContent = text;
+  e.dataset.term = term.id;
+  if (url != null) {
+    e.href = `${url}#${term.id}`;
+    if (newTab) { e.target = "_blank"; e.rel = "noopener"; }
+  } else e.tabIndex = 0;
+  e.setAttribute("aria-label", `${text}: ${term.short}`);
+  return e;
+}
+
+// One tooltip for the whole page, positioned under the hovered term.
+(() => {
+  const style = document.createElement("style");
+  style.textContent = `
+.term { color: inherit; text-decoration: underline dotted var(--accent, #6a3fd1); text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px; cursor: help; }
+a.term { cursor: pointer; }
+.term:hover, .term:focus-visible { color: var(--accent, #6a3fd1); outline: none; }
+#term-tip { position: absolute; z-index: 50; max-width: min(340px, calc(100vw - 32px)); padding: 8px 10px;
+  background: var(--panel, #fff); color: var(--text, #1d1d1f); border: 1px solid var(--border, #e2e2e0);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, .15); font-size: 13px; line-height: 1.45;
+  white-space: normal; pointer-events: none; }
+#term-tip b { display: block; margin-bottom: 2px; color: var(--accent, #6a3fd1); }
+#term-tip .more { display: block; margin-top: 4px; color: var(--muted, #6b6b70); font-size: 11.5px; }`;
+  document.head.appendChild(style);
+  const tip = document.createElement("div");
+  tip.id = "term-tip";
+  tip.hidden = true;
+  tip.setAttribute("role", "tooltip");
+  const show = e => {
+    const el = e.target.closest && e.target.closest(".term");
+    if (!el) return;
+    const t = GLOSSARY.byId[el.dataset.term];
+    tip.innerHTML = "";
+    const b = document.createElement("b"), p = document.createElement("span");
+    b.textContent = t.term;
+    p.textContent = t.short;
+    tip.append(b, p);
+    if (el.tagName === "A") {
+      const more = document.createElement("span");
+      more.className = "more";
+      more.textContent = "click for the glossary entry";
+      tip.append(more);
+    }
+    if (!tip.isConnected) document.body.appendChild(tip);
+    tip.hidden = false;
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(8, Math.min(r.left, document.documentElement.clientWidth - w - 8));
+    const top = r.bottom + h + 8 > window.innerHeight && r.top > h + 8 ? r.top - h - 6 : r.bottom + 6;
+    tip.style.left = `${left + window.scrollX}px`;
+    tip.style.top = `${top + window.scrollY}px`;
+  };
+  const hide = e => { if (e.target.closest && e.target.closest(".term")) tip.hidden = true; };
+  document.addEventListener("mouseover", show);
+  document.addEventListener("focusin", show);
+  document.addEventListener("mouseout", hide);
+  document.addEventListener("focusout", hide);
+})();
+</script>
 <script>
 const DATA = JSON.parse(document.getElementById("data").textContent);
 const MODELS = DATA.models;
@@ -392,22 +989,20 @@ function drawTable() {
 ["q", "moe-only", "refs"].forEach(id => document.getElementById(id).addEventListener("input", drawTable));
 
 // --- glossary -----------------------------------------------------------------------------
-[["Mixture-of-Experts (MoE)", "The feed-forward block is replaced by many smaller FFNs (experts) and a router that sends each token to a few of them. Total parameters grow, the work per token does not.", "In LLM-Sim: the \"Feed-forward\" steps, one FFN per layer (a dense model)."],
- ["Shared expert", "An expert that every token goes through, next to the routed ones: it learns what is common to all tokens.", ""],
- ["GQA (grouped-query attention)", "Several query heads share one key/value head (e.g. 64 query heads, 8 KV heads), so the KV-cache is 8× smaller.", "In LLM-Sim: every head has its own K and V (\"Queries, keys, values\" step)."],
- ["MLA (multi-head latent attention)", "Keys and values are rebuilt from a small latent vector (e.g. 512 numbers) per token; only the latent goes in the KV-cache.", "In LLM-Sim: the \"KV-cache\" step stores full K and V rows."],
- ["Sliding window / local attention", "A layer only looks at the last N tokens (128 … 4096). Cheap, and alternated with full-attention layers that keep the long-range view.", "TinyStories: half of its layers are local (window 256)."],
- ["Linear attention / state-space (DeltaNet, KDA, Mamba)", "Instead of a KV-cache that grows with the text, the layer keeps a fixed-size state updated at every token: cost linear in the length.", ""],
- ["Sparse attention (DSA, CSA)", "A small \"indexer\" scores the past tokens and the attention runs only on the top-k of them (e.g. 1024 out of 1M).", "In LLM-Sim: the \"Causal mask + softmax\" step weighs all past tokens."],
- ["RoPE", "Positions are encoded by rotating Q and K by an angle proportional to the position, instead of adding a learned table P. θ sets the slowest rotation; long contexts use a large θ.", "In LLM-Sim: \"Positional encoding: how P is obtained, and why\"."],
- ["Tied embeddings", "The output matrix W_U is the transpose of the input table W_E, saving vocabulary × d_model parameters.", "In LLM-Sim: W_E and W_U are separate (\"weights\" command)."],
- ["Multi-token prediction (MTP)", "Extra small layers trained to predict the 2nd, 3rd … next token; used to speed up generation (speculative decoding).", "In LLM-Sim: one token per forward pass (\"Pick the next token\")."],
- ["Active parameters", "The parameters one token actually uses: attention, shared parts and the chosen experts. They set the compute per token; the total sets the memory.", ""]]
-  .forEach(([t, d, s]) => {
-    const dt = h("dt", null, t), dd = h("dd", null, d);
-    if (s) dd.append(h("span", "sim", s));
-    document.getElementById("glossary").append(dt, dd);
-  });
+// The terms come from the simulator's glossary (llmsim/assets/glossary.json); the full page is
+// glossary.html, linked only when the page is part of the site.
+const GLOSSARY_URL = document.getElementById("glossary-link") ? "glossary.html" : null;
+GLOSSARY.terms.filter(t => t.group === "modern" && t.id !== "open-weight").forEach(t => {
+  const dt = h("dt"), dd = h("dd", null, t.short);
+  if (GLOSSARY_URL) { const a = h("a", null, t.term); a.href = `${GLOSSARY_URL}#${t.id}`; dt.append(a); }
+  else dt.textContent = t.term;
+  if (t.in_llmsim) dd.append(h("span", "sim", `In LLM-Sim: ${t.in_llmsim.replace(/`/g, "")}`));
+  document.getElementById("glossary").append(dt, dd);
+});
+{
+  const seen = new Set();
+  document.querySelectorAll("main > .lead, section > p").forEach(p => linkTerms(p, { url: GLOSSARY_URL, seen }));
+}
 
 // --- architecture diagrams ------------------------------------------------------------------
 const MIXER = { F: ["full attention", "--series-1"], L: ["local attention", "--series-2"], N: ["linear attention", "--series-3"],
